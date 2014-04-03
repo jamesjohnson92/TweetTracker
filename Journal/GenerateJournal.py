@@ -14,13 +14,13 @@ out = open("Journal.tex","w+")
 out.write("\\input{Preamble.tex}\n\\begin{document}\n\n\\author{Jo, Dilli and Howon}\\title{CS341 Journal}\\maketitle\n\n")
 
 for p in sorted(jo_files + dilli_files + howon_files, key=lambda a: map(int,re.match(entry_filename_regex,a[1]).groups())):
-    out.write("\\section*{%s: %s}\n" % (p[0],p[1][0:-4]))
+    out.write("\\section*{%s: %s-2014}\n" % (p[0],p[1][0:-4]))
     out.write("\\input{%s/%s}\n\n"  % p)
 
 out.write("\\end{document}\n")
 out.close()
 
 
-os.system("pdflatex -nonstopmode Journal.tex")
+os.system("pdflatex -interaction=nonstopmode Journal.tex")
 
               
