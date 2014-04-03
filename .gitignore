@@ -19,3 +19,14 @@
 *.exe
 *.out
 *.app
+
+# Latex intermidiates
+*.log
+*.aux
+
+
+# Python stuff
+*.pyc
+
+# EMACS problems
+*~
