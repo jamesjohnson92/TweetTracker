@@ -2,7 +2,7 @@ import os
 import os.path
 import re
 
-entry_filename_regex = r"^\d+\-\d+\.tex$"
+entry_filename_regex = r"^(\d+)\-(\d+)\.tex$"
 
 jo_files = [ ("Jo",f) for f in os.listdir("Jo") if  re.match(entry_filename_regex,f)]
 dilli_files = [ ("Dilli",f) for f in os.listdir("Dilli") if re.match(entry_filename_regex,f)]
