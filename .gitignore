@@ -28,5 +28,8 @@
 # Python stuff
 *.pyc
 
+# other stuff
+*.png
+
 # EMACS problems
 *~
