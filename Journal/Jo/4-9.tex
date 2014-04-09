@@ -1,0 +1,26 @@
+
+
+\subsection*{Topic Distillation}
+
+The module \texttt{Topic.py} has a function \texttt{topic_model} which takes a number of topics and a list of word_count histograms for some documents and performs LDA on it to assign each document to a topic and to topic a distribution of words.
+The TwitterRank paper recommends running this where each document is all words of all a user's tweets.  
+We can try this with users picked in various ways and words chosen in various ways.  
+Does reasonably on the generative model in \texttt{TopicTest.py}.
+
+Everything runs in-memory and not distributed.
+We should be able to fix this so that the histograms actually live on disk and are streamed when necessary, but I don't know if we'll need to yet.  It depends on the size of the Twittersphere we wish to rank and the number of words considered.  
+
+This analysis is required to compute the edge weights for the GraphRank algorithm.  
+
+
+\subsection*{GraphRank}
+
+Given as input is a JSON graph where each node has its weighted outgoing edges and teleportation probability.
+Outputs the weighted graph rank.  
+The TwitterRank paper recommends running this once per topic where the edges are weighted by topic similarity and number of tweets and the teleportation probabilities are the topic ratings for each user.  
+We should try to use the explosive retweetiness for edge probabilities.  
+
+\subsection*{TODO}
+
+Link these together (even on a fake graph), and make this happen on a fraction of our data.
+Probably will require a map reduce run to get histograms.  
