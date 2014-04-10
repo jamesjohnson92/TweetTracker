@@ -1,17 +1,7 @@
 import pymc
 import numpy as np
 import random
-
-# wait, why doesn't numpy or something have this already?
-#
-def weighted_choice(weights):
-    r = random.uniform(0, 1)
-    upto = 0
-    for w in range(len(weights)):
-        if upto + weights[w] > r:
-            return w
-        upto += weights[w]
-
+from numpy.random import choice
 
 # creates a model useable by pymc for topic selection
 # word_counts is a list of word count histograms
@@ -35,17 +25,18 @@ def make_topic_model(num_topics, word_counts):
     #
     @pymc.stochastic(dtype=int)
     def topic(value=np.empty(NUM_DOCUMENTS), td=topic_dist):
-        
+
         def logp(value,td):
             bins = range(NUM_TOPICS+1)
             bins[-1] = bins[-1] - 0.1
             return pymc.multinomial_like(np.histogram(value, bins=bins)[0],
                                              n=NUM_DOCUMENTS, p=td)
-            
+
         def random(td):
             result = []
+            elements = np.arange(len(td))
             for i in range(NUM_DOCUMENTS):
-                result.append(weighted_choice(td))
+                result.append(choice(elements, p=td))
             return result
 
     # Observed word counts, which are modeled as multinomial with probabilities from word_dist[topic[i]].
@@ -57,7 +48,7 @@ def make_topic_model(num_topics, word_counts):
                                                     word_dist, topic[i]),
                                        observed = True,
                                        value = DOCUMENT_WORD_COUNTS[i])
-        
+
     return locals()
 
 # This is the function you call to fit the model
