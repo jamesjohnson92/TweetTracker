@@ -2,6 +2,7 @@ from mrjob.job import MRJob
 import json as simplejson
 import re
 
+
 class MRWordFrequencyCount(MRJob):
 
 	def mapper_get_words(self, _, line):
@@ -15,7 +16,7 @@ class MRWordFrequencyCount(MRJob):
 					for w in words :
 						if w != '':
 							yield user, w
-							return
+					return
 							
 		yield '0', 'UNK'
 
@@ -37,7 +38,7 @@ class MRWordFrequencyCount(MRJob):
 	def steps(self):
 		return [
 			self.mr(mapper=self.mapper_get_words,
-					reducer=self.reducer_separate_words),
+				reducer=self.reducer_separate_words),
 			self.mr(reducer=self.reducer_count_words)
         ]
 
