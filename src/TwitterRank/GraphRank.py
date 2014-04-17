@@ -21,17 +21,6 @@ from mrjob.protocol import JSONProtocol
 from mrjob.step import MRStep
 
 
-def encode_node(node_id, links=None, score=1, teleport_prob=1):
-    node = {}
-    if links is not None:
-        node['links'] = sorted(links.items())
-
-    node['score'] = score
-    node['telep_prob'] = teleport_prob
-
-    return JSONProtocol.write(node_id, node) + '\n'
-
-
 class MRPageRank(MRJob):
 
     INPUT_PROTOCOL = JSONProtocol  # read the same format we write
@@ -53,8 +42,8 @@ class MRPageRank(MRJob):
         """
         yield node_id, ('node', node)
 
-        for dest_id, weight in node.get('links') or []:
-            yield dest_id, ('score', node['score'] * weight)
+        for dest_id, weights in node.get('links') or []:
+            yield dest_id, ('score', [s * w for s,w in zip(node['score'], weights)])
 
     def reducer_init(self):
         self.open_file = open(self.options.telepprobs, 'r')
@@ -83,10 +72,16 @@ class MRPageRank(MRJob):
                 node = value
             else:
                 assert value_type == 'score'
-                total_score += value
-
+                if total_score == 0:
+                    total_score = value
+                else: 
+                    for i in len(total_score):
+                        total_score[i] += value[i]
+            
         node['prev_score'] = node['score']
-        node['score'] = (1 - self.option.beta) * node['telep_prob'] + self.option.beta * total_score
+        b = self.option.beta # for readability
+        for i in len(score):
+            node['score'][i] = (1 - b) * node['telep_prob'][i] + b * total_score[i]
 
         yield node_id, node
 
