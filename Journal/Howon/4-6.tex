@@ -1,8 +1,8 @@
 More resources, I found. More thoughts about the data, I had.
 
-https://dev.twitter.com/docs/platform-objects is probably most important for not having to go through the json fields themselves. We will have the problem of nulled fields, empty sets, and this field guide (get it? birds?) has the defaults.
+\url{https://dev.twitter.com/docs/platform-objects} is probably most important for not having to go through the json fields themselves. We will have the problem of nulled fields, empty sets, and this field guide (get it? birds?) has the defaults.
 
-https://github.com/kevinweil/elephant-bird/ is a good resource for dealing with json in hadoop
+\url{https://github.com/kevinweil/elephant-bird/} is a good resource for dealing with json in hadoop
 
 The dataset is about 400 gb. It seems like a 1\% sample would be good, as it allows us to fit it on main memory even on a crappy box like mine. This I approximated a little bit by taking a 1-file sample, which is actually just about a gigabyte: ideally, we would use something like TABLESAMPLE in Hive or SAMPLE in Pig Latin, because then it would be a good pseudorandom sample.
 
