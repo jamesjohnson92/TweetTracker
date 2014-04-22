@@ -1,4 +1,4 @@
-\subsection{Multi-Topic TwitterRank and Lots of Parameters}
+\subsection*{Multi-Topic TwitterRank and Lots of Parameters}
 
 We've mentioned parameter reduction a few times and been afraid of introducing lots of parameters in out model, but in this context I don't think its important.  
 
@@ -13,7 +13,7 @@ Here, $N$ is HUGE.  However, I don't think it matters.
 There is another Bayesian process with only $T(1+W) + kU$ parameters to learn, but the posterior of these parameters are exactly the same as the posterior of the network described above.  We get this process simply by marginalizing out the topic-per-user parameters, meaning that the conditional distribution of the words per tweet is more complicated, but this doesn't matter.
 The point is that the posterior estimate for the topic-per-user, which is what we care about, is no better than if we had all those extra parameters, so (unless it becomes a computational problem) parameter reduction is actually not an issue here, so long as we don't actually use the topic-per-tweet estimates.  Thus coming up with a better model is actually super easy, and some variant of the one described above will probably work.  
 
-\subsection{Priors}
+\subsection*{Priors}
 
 We shouldn't use flat priors for the topic distributions since because symmetry.
 We expect some topics to be more popular than others (even if we don't know which), so it might be wise if the priors reflect that.

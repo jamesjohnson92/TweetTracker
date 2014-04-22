@@ -1,0 +1,33 @@
+\subsection*{Retweet Sensitive TwitterRank}
+
+TwitterRank is now done.
+I made two modifications to it to make it more sensitive to the retweet structure.
+The first is modest: retweets should count towards your LDA topics.
+The second is I changed the edge weight a bit.
+
+The TwitterRank paper had the weight weight
+\[P_t(i,j) = \frac{|T_j|}{\sum_a |T_a|}\mbox{sim}_t(i,j)\]
+where the sum in the denominator is over $a$ such that $i$ follows $a$ and the similarity is topic similarity in topic $t$.
+I want to (and did) change it to
+\[P_t(i,j) = \frac{R_{i,j}|T_j|}{\sum_a R_{i,a}|T_a|}\mbox{sim}_t(i,j)\]
+where $R_{i,j}$ is the number of times user $i$ retweets user $j$.
+Thus you give more rank to someone who you retweet more, but you still get rank by dominating someones feed.
+Also, if you never retweet someone, you give them no rank, no matter their visibility (which is good, because we can't sense people who never retweet anyway).  
+
+\subsection*{Proposal: A Generative Model for Retweets}
+
+Each for each topic $t$ and each user $u$, there is a parameter $\phi_{t,u}\in[0,1]$ which is $u$'s overall probability of retweeting a tweet of topic $t$ when she sees it.
+Then for each tweet $s$, there is a parameter $\alpha_{t,s}$ which says how intrinsically retweetable tweet $s$ is in topic $t$ (that is, perhaps $s$ is a really good sports post but not a good music post).  
+The first time user $u$ sees tweet $s$, they retweet it in topic $t$ with probability $\phi_{t,u}\alpha_{t,s}$, so the probability they retweet it is
+\[\Prob{\mbox{$u$ retweets $s$} | \mbox{first encounter}} = 1-\prod_t\left(1- \phi_{t,u}\alpha_{t,s}\right)\]
+(that is, if its a good sports tweet and $u$ likes sports, they are likely to retweet it).
+The probability they retweet it on the second encounter is 0, no matter what.  
+
+The thing I'm imagining is a tweet rippling through the network and stopping not because it loses steam, but because it gets cornered and runs out of new places to go; see \href{http://en.wikipedia.org/wiki/Small-world_network}{small world networks}.  
+
+Crazy assumption:  every user sees everything their friends tweet!  
+I vote that until we prove it causes problems, we ignore it.
+One possible justification is that when more people are awake there are more tweets in play and people won't read them all anyways, and when there are less people awake there are less tweets so it might still be there in the morning.  
+If this is causing problems, we say that actually the $\phi_{t,u}$ parameters are actually time-dependent.  
+We still assume very user sees every tweet, but at 3:00am $\phi_{*,u}$ gets really small, so they don't retweet even really good ones.  
+
