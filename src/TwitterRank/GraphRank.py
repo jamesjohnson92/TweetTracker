@@ -19,7 +19,8 @@
 #
 from mrjob.protocol import JSONProtocol
 from mrjob.step import MRStep
-
+from mrjob.job import MRJob
+import mrjob
 
 class MRPageRank(MRJob):
 
@@ -42,20 +43,9 @@ class MRPageRank(MRJob):
         """
         yield node_id, ('node', node)
 
-        for dest_id, weights in node.get('links') or []:
+        for dest_id, weights in node['links']:
             yield dest_id, ('score', [s * w for s,w in zip(node['score'], weights)])
 
-    def reducer_init(self):
-        self.open_file = open(self.options.telepprobs, 'r')
-        self.teleportation_vector = mmap.mmap(self.open_file.fileno(),0)
-        self.options.beta = float(self.options.beta)
-
-    def reducer_final(self):
-        self.teleportation_vector.close()
-        self.open_file.close()
-
-    def teleport_prob(self, i):
-        return struct.unpack(self.teleportation_vector[i * FLOATSIZE : (i+1) * FLOATSIZE])
 
 
     def receive_score(self, node_id, typed_values):
@@ -75,19 +65,23 @@ class MRPageRank(MRJob):
                 if total_score == 0:
                     total_score = value
                 else: 
-                    for i in len(total_score):
+                    for i in range(len(total_score)):
                         total_score[i] += value[i]
-            
+
         node['prev_score'] = node['score']
-        b = self.option.beta # for readability
-        for i in len(score):
-            node['score'][i] = (1 - b) * node['telep_prob'][i] + b * total_score[i]
+        b = self.options.beta # for readability
+        if total_score == 0: #noinlinks
+            for i in range(len(node['score'])):
+                node['score'][i] = (1 - b) * node['telep_prob'][i]
+        else:
+            for i in range(len(total_score)):
+                node['score'][i] = (1 - b) * node['telep_prob'][i] + b * total_score[i]
 
         yield node_id, node
 
     def steps(self):
-        return ([MRStep(mapper=self.send_score, reducer_final=self.reducer_final,
-                        reducer_init=self.reducer_init,reducer=self.receive_score)] *
+        return ([MRStep(mapper=self.send_score, 
+                        reducer=self.receive_score)] *
                 self.options.iterations)
 
 if __name__ == '__main__':

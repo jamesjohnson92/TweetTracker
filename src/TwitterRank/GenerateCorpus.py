@@ -9,7 +9,10 @@ class GenerateCorpus(MRJob):
         tweet = simplejson.loads(line)
         if 'twitter_lang' in tweet and tweet['twitter_lang'] == 'en' and 'actor' in tweet :
             user = tweet['actor']['id'][len(USERID_PREFIX) :]
-            yield user, tweet['body']
+            yield int(user), tweet['body']
+            if 'retweetCount' in tweet and int(tweet['retweetCount']) > 0:
+                tweeter = tweet['object']['actor']['id'][len(USERID_PREFIX) :]
+                yield int(tweeter), tweet['body']
 
     def reducer(self, user, tweets):
         yield user, ' '.join(tweets)
