@@ -1,0 +1,30 @@
+\subsection*{A simple model for a prediction}
+
+We wish to predict $\log(\mbox{number of retweets})$ of a tweet after an hour using a linear model where our features are as follows
+
+\begin{enumerate}[a)]
+
+\item
+
+  The user's twitterank for each of 30 topics
+
+\item 
+  
+  The tweets topic distribution for each of 30 topics
+
+\item 
+
+  The tweet's retweet rate in each five minute period up to a halfhour (6 features)
+
+\item 
+
+  The tweet's favorite rate in each five minute period up to a halfhour (6 features)
+
+\item 
+
+  User favorite counts, followers counts and status counts (3 features)
+
+\end{enumerate}
+
+Generically we aren't using any temporal features, and we aren't normalizing by the number of followers or anything like that (so the last three features might just swamp), but once we construct the data matrix we can try all sorts of different versions of this.  
+I plan on using LAARDD for the regression (shameless plug).   
