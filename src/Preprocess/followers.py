@@ -17,17 +17,10 @@ class MRFollowers(MRJob):
 			tweeter = tweet['object']['actor']['id'][len('id:twitter.com:') :]
 			user = tweet['actor']['id'][len('id:twitter.com:') :]
 			yield user, tweeter
-
 	
 	def reducer_followers(self, user, follows):
 		for u2 in follows:
 			yield user, u2
-
-	def steps(self):
-		return [
-			self.mr(mapper=self.mapper_followers,
-				reducer=self.reducer_followers)
-	    ]
 
 if __name__ == '__main__':
     MRFollowers.run()

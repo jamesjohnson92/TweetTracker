@@ -1,0 +1,215 @@
+{
+	"body": "RT @6LXC: RT if your weekend will consist of you just playing xbox.", 
+	
+	"retweetCount": 9, 
+	
+	"generator": {
+		"link": "http://twitter.com/download/android", 
+		"displayName": "Twitter for Android"
+	}, 
+
+	"twitter_filter_level": "medium", 
+	"gnip": {
+		"language": {
+			"value": "en"
+		}
+	}, 
+
+	"favoritesCount": 0, 
+	"object": {
+		"body": "RT if your weekend will consist of you just playing xbox.", 
+		"generator": {
+			"link": "https://about.twitter.com/products/tweetdeck", 
+			"displayName": "TweetDeck"
+		}, 
+
+		"favoritesCount": 1, 
+
+		"object": {
+			"postedTime": "2014-03-01T00:00:07.000Z", 
+			"summary": "RT if your weekend will consist of you just playing xbox.", 
+			"link": "http://twitter.com/6LXC/statuses/439550614239186944", 
+			"id": "object:search.twitter.com,2005:439550614239186944", 
+			"objectType": "note"
+		}, 
+
+		"actor": {
+			"preferredUsername": "6LXC", 
+			"displayName": "Genesis GLXC", 
+			"links": [
+				{
+					"href": "http://youtube.com/duhrandy", 
+					"rel": "me"
+				}
+			], 
+
+			"twitterTimeZone": "Central Time (US & Canada)", 
+			"image": "https://pbs.twimg.com/profile_images/439510162177392640/URuxQz-f_normal.png", 
+			"verified": false, 
+			"location": {
+				"displayName": "@TheGenesisClan",
+				"objectType": "place"
+			}, 
+
+			"statusesCount": 40953, 
+			"summary": "{o,o}", 
+			"languages": ["en"], 
+			"utcOffset": "-21600", 
+			"link": "http://www.twitter.com/6LXC", 
+			"followersCount": 9226, 
+			"favoritesCount": 1818, 
+			"friendsCount": 146, 
+			"listedCount": 13, 
+			"postedTime": "2012-12-27T19:23:47.000Z", 
+			"id": "id:twitter.com:1040375294", 
+			"objectType": "person"
+		}, 
+
+		"twitter_lang": "en", 
+		"twitter_entities": {
+			"symbols": [], 
+			"user_mentions": [], 
+			"hashtags": [], 
+			"urls": []
+		}, 
+		"verb": "post", 
+		"link": "http://twitter.com/6LXC/statuses/439550614239186944", 
+		"provider": {
+			"link": "http://www.twitter.com", 
+			"displayName": "Twitter", 
+			"objectType": "service"
+		}, 
+		"postedTime": "2014-03-01T00:00:07.000Z", 
+		"id": "tag:search.twitter.com,2005:439550614239186944", 
+		"objectType": "activity"
+	}, 
+
+	"actor": {
+		"preferredUsername": "blendingoptions", 
+		"displayName": "$cumbag Terrel ", 
+		"links": [
+			{
+				"href": null, 
+				"rel": "me"
+			}
+		], 
+		"twitterTimeZone": "Eastern Time (US & Canada)", 
+		"image": "https://pbs.twimg.com/profile_images/438459648891289600/pWH1jBW__normal.png", 
+		"verified": false, 
+		"location": {
+			"displayName": "Euphoria", 
+			"objectType": "place"
+		}, 
+		"statusesCount": 3245, 
+		"summary": "Delusional. EST 19XX/Sad Boys/TeamSESH. Euphoric", 
+		"languages": ["en"], 
+		"utcOffset": "-18000", 
+		"link": "http://www.twitter.com/blendingoptions", 
+		"followersCount": 280, 
+		"favoritesCount": 9968, 
+		"friendsCount": 335, 
+		"listedCount": 0, 
+		"postedTime": "2013-11-05T04:42:58.000Z", 
+		"id": "id:twitter.com:2175355656", 
+		"objectType": "person"
+	}, 
+	"twitter_lang": "en", 
+	"twitter_entities": {
+		"symbols": [], 
+		"user_mentions": [
+			{
+				"id": 1040375294, 
+				"indices": [3, 8], 
+				"id_str": "1040375294", 
+				"screen_name": "6LXC", 
+				"name": "Genesis GLXC"
+			}
+		], 
+		"hashtags": [], 
+		"urls": []
+	}, 
+	"verb": "share", 
+	"link": "http://twitter.com/blendingoptions/statuses/439550783931944961", 
+	"provider": {
+		"link": "http://www.twitter.com", 
+		"displayName": "Twitter", 
+		"objectType": "service"
+	}, 
+	"postedTime": "2014-03-01T00:00:48.000Z", 
+	"id": "tag:search.twitter.com,2005:439550783931944961", 
+	"objectType": "activity"
+}
+
+{
+	"body": "Pagiiiii!!!!", 
+	"retweetCount": 0, 
+	
+	"generator": {
+		"link": "http://twitter.com/download/iphone", 
+		"displayName": "Twitter for iPhone"
+	}, 
+	
+	"twitter_filter_level": "medium", 
+	
+	"gnip": {
+		"language": {
+			"value": "id"
+		}
+	}, 
+	
+	"favoritesCount": 0, 
+	"object": {
+		"postedTime": "2014-03-01T00:00:00.000Z", 
+		"summary": "Pagiiiii!!!!", 
+		"link": "http://twitter.com/Alissa_Fitri/statuses/439550583003836416", 
+		"id": "object:search.twitter.com,2005:439550583003836416", 
+		"objectType": "note"
+	}, 
+	"actor": {
+		"preferredUsername": "Alissa_Fitri", 
+		"displayName": "AlissaFitri", 
+		"links": [
+			{
+				"href": "http://twitter.com/alissa_fitri", 
+				"rel": "me"
+			}
+		], 
+		
+		"twitterTimeZone": null, 
+		"image": "https://pbs.twimg.com/profile_images/431051608487518209/8t4guVgU_normal.jpeg", 
+		"verified": false, 
+		"location": {
+			"displayName": "indonesia ", 
+			"objectType": "place"
+		}, 
+
+		"statusesCount": 269, 
+		"summary": "TEEN TOP || @Kemalpalevi || Mention For Followback || Let's be friend^^ || 23 is a special date for me",
+		"languages": ["id"], 
+		"utcOffset": null, 
+		"link": "http://www.twitter.com/Alissa_Fitri", 
+		"followersCount": 77, 
+		"favoritesCount": 691, 
+		"friendsCount": 91, 
+		"listedCount": 0, 
+		"postedTime": "2012-06-19T16:32:43.000Z", 
+		"id": "id:twitter.com:612682384", 
+		"objectType": "person"
+	}, 
+	"twitter_lang": "in", 
+	"twitter_entities": {
+		"symbols": [], 
+		"user_mentions": [], 
+		"hashtags": [], "urls": []
+	}, 
+	"verb": "post", 
+	"link": "http://twitter.com/Alissa_Fitri/statuses/439550583003836416", 
+	"provider": {
+		"link": "http://www.twitter.com", 
+		"displayName": "Twitter", 
+		"objectType": "service"
+	}, 
+	"postedTime": "2014-03-01T00:00:00.000Z", 
+	"id": "tag:search.twitter.com,2005:439550583003836416", 
+	"objectType": "activity"
+}
