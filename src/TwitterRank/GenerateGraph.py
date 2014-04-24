@@ -54,7 +54,7 @@ class GenerateTRGraph(MRJob):
             trg_gamma = map(float, splitline[2:])
             links.append((trg, trg_num_tweets, trg_gamma))
                 
-        for i in range(len(links)):
+        for i in xrange(len(links)):
             trg = links[i][0]
             trg_num_tweets = links[i][1]
             trg_gamma = links[i][2]

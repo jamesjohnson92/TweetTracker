@@ -65,16 +65,16 @@ class MRPageRank(MRJob):
                 if total_score == 0:
                     total_score = value
                 else: 
-                    for i in range(len(total_score)):
+                    for i in xrange(len(total_score)):
                         total_score[i] += value[i]
 
         node['prev_score'] = node['score']
         b = self.options.beta # for readability
         if total_score == 0: #noinlinks
-            for i in range(len(node['score'])):
+            for i in xrange(len(node['score'])):
                 node['score'][i] = (1 - b) * node['telep_prob'][i]
         else:
-            for i in range(len(total_score)):
+            for i in xrange(len(total_score)):
                 node['score'][i] = (1 - b) * node['telep_prob'][i] + b * total_score[i]
 
         yield node_id, node
