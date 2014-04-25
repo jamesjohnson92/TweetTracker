@@ -1,22 +1,17 @@
 #!/bin/sh
 
-indir='hdfs:///user/cloudera/twitterdata/threehours';
-outdir='hdfs:///user/cloudera/twitterrankout';
+indir='s3:///tweettrack/Twitter_Teacup/';
+outdir='s3:///tweettrack/Twitterrank_Output/';
 numtopics=30;
 nummappers=1;
 numreducers=1;
-mrldajar='/home/cloudera/Mr.LDA/bin/Mr.LDA-0.0.1.jar';
+mrldajar='s3:///mrldajarbucket/Mr.LDA-0.0.1.jar';
+stopwords='s3:///mrldajarbucket/stopwords';
 setnums='--jobconf mapreduce.map.tasks=1 --jobconf mapreduce.reduce.tasks=1'
 
-hadoop fs -rm -r $outdir;
-hadoop fs -mkdir $outdir;
-
-python GenerateCorpus.py $setnums -r hadoop $indir --output-dir $outdir/corpus;
-hadoop jar $mrldajar cc.mrlda.ParseCorpus -input $outdir/corpus -output $outdir/parsecorpus -mapper $nummappers -reducer $numreducers -stoplist stopwords;
-hadoop jar $mrldajar cc.mrlda.VariationalInference -input $outdir/parsecorpus/document -output $outdir/ldapreout -mapper $nummappers - reducer $numreducers -term 10000 -topic $numtopics -directemit;
-hadoop jar $mrldajar cc.mrlda.DisplayDocument -input $outdir/ldapreout/gamma-30 -output $outdir/ldaout;
-python FollowersTable.py  $setnums -r hadoop $indir --output-dir $outdir/followertable;
-python ldapreprocesspostprocess.py $numtopics;
-hive -hiveconf TROPATH=$outdir -f ldapostprocess.q;
-python GenerateGraph.py  $setnums -r hadoop $outdir/pregraph --numtopics $numtopics --sumgamma $outdir/gammasums/000000_0 --output-dir $outdir/graph;
-python GraphRank.py  $setnums -r hadoop $outdir/graph --output-dir $outdir/twitterrank;
+python GenerateCorpus.py $setnums -r emr $indir --output-dir $outdir/corpus --no-output;
+python RunMrLDA.py emr $mrldajar $outdir $nummappers $numreducers $numtopics $stopwords
+python FollowersTable.py  $setnums -r emr $indir --output-dir $outdir/followertable > python ldapreprocesspostprocess.py $numtopics;
+python RunHive.py emr $outdir
+python GenerateGraph.py  $setnums -r emr $outdir/pregraph --numtopics $numtopics --sumgamma $outdir/gammasums/000000_0 --output-dir $outdir/graph --no-output;
+python GraphRank.py  $setnums -r emr $outdir/graph --output-dir $outdir/twitterrank --no-output;

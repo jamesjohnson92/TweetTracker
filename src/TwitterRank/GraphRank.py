@@ -64,7 +64,7 @@ class MRPageRank(MRJob):
                 assert value_type == 'score'
                 if total_score == 0:
                     total_score = value
-                else: 
+                else:
                     for i in xrange(len(total_score)):
                         total_score[i] += value[i]
 
@@ -80,7 +80,7 @@ class MRPageRank(MRJob):
         yield node_id, node
 
     def steps(self):
-        return ([MRStep(mapper=self.send_score, 
+        return ([MRStep(mapper=self.send_score,
                         reducer=self.receive_score)] *
                 self.options.iterations)
 

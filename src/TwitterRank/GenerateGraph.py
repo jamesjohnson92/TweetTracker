@@ -26,7 +26,7 @@ class GenerateTRGraph(MRJob):
         splitline = line.split(' ')
         yield ' '.join(splitline[0:1+self.options.numtopics]), ' '.join(splitline[1+self.options.numtopics:])
         yield ' '.join([splitline[1+self.options.numtopics]] + splitline[3+self.options.numtopics:]), 'no_val'
-        
+
 
     def reducer_init(self):
         with open(self.options.sumgamma, "r") as f:
@@ -53,7 +53,7 @@ class GenerateTRGraph(MRJob):
             out_tweets += trg_num_tweets
             trg_gamma = map(float, splitline[2:])
             links.append((trg, trg_num_tweets, trg_gamma))
-                
+
         for i in xrange(len(links)):
             trg = links[i][0]
             trg_num_tweets = links[i][1]
@@ -63,8 +63,8 @@ class GenerateTRGraph(MRJob):
             links[i] = (trg, weights)
 
         src_telep_prob = [g/sg for g,sg in zip(src_gamma,self.gamma_sums)]
-            
+
         yield src, encode_node(links, src_telep_prob, [1] * len(src_telep_prob))
-    
+
 if __name__ == '__main__':
     GenerateTRGraph.run()
