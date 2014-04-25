@@ -1,0 +1,23 @@
+\subsection*{Model update}
+
+Jeff Ulman suggests $\alpha_{t,s}=0$ for all but one $t$, denoted $\tau_s$.
+The new model is
+\[\Prob{\mbox{$u$ retweets $s$} | \mbox{$u$ seen $s$}} = \phi_{\tau_s,u}\alpha_{s}\]
+We can write observe indicator variables $a_{s,u}$ and $b_{s,u}$, where $a_{s,t}$ indicates $t$ has seen $s$ and $b_{s,u}$ indicates $u$ has re tweeted $s$.
+These variables can be learned in a MapReduce job, as can $\tau$.  
+Then we have
+\[l(\alpha,\phi | a,b,\tau) = \sum_s \sum_u a_{s,u}\left(b_{s,u}\log(\alpha_{s}\phi_{\tau_s,u}) + (1-b_{s,u})\log(1-\alpha_{s}\phi_{\tau_s,u})\right)\]
+Cool!  Thats a formula, and its a sparse formula (for a fixed $s$, list all the nonzero $b_{s,u}$ and then all the nonzero $a_{s,u}$ with $b_{s,u}$ zero... oh wait there might be a lot of nonzero $a_{s,u}$... wait we don't need to compute this nevermind).  
+Then we have
+\[\frac{\partial}{\partial \alpha_s}l = \sum_u a_{s,u}\left(b_{s,u}\frac{1}{\alpha_s} - (1-b_{s,u})\frac{\phi_{\tau_s,u}}{1-\phi_{\tau_s,u}\alpha_s}\right)\]
+\[\frac{\partial}{\partial \phi_{t,s}}l = \sum_{s|\tau_s=t} a_{s,u}\left(b_{s,u}\frac{1}{\phi_{t,u}} - (1-b_{s,u})\frac{\alpha_s}{1-\phi_{t,u}\alpha_s}\right)\]
+
+This has the excellent property that, given an observation $x_{s,u} = (u,s,a_{s,u},b_{s,u},\tau_s)$, we have that all but two terms of the stochastic gradient are zero!  Furthermore, we only need to know two current values!
+This means that SGD will be real easy to map-reduce!  We don't need no fancy library! 
+
+Specifically, the mapper gets the tuple $(u,s,b_{s,u},\tau_s,\phi_{\tau_s,u},\alpha_s)$ where the last two values are the current estimates.
+It outputs $((u,s,\tau_s,$'$a$'$),b_{s,u},\phi_{\tau_s,u},\alpha_s)$ and $((u,s,\tau_s,$'$b$'$),b_{s,u},\phi_{\tau_s,u},\alpha_s)$.
+The reducer then forms the obvious sum and outputs the new values of $\phi_{\tau_s,u}$ and $\alpha_s$.
+Then a second stage (or a hive job) joins the results.  See \texttt{src/AlphaPhi/SGD.py}.  
+
+Bam!  Done.  How you like me now.  
