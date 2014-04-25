@@ -10,7 +10,7 @@ stopwords='s3:///mrldajarbucket/stopwords';
 setnums='--jobconf mapreduce.map.tasks=1 --jobconf mapreduce.reduce.tasks=1'
 
 python GenerateCorpus.py $setnums -r emr $indir --output-dir $outdir/corpus --no-output;
-python RunMrLDA.py emr $mrldajar $outdir $nummappers $numreducers $stopwords
+python RunMrLDA.py emr $mrldajar $outdir $nummappers $numreducers $numtopics $stopwords
 python FollowersTable.py  $setnums -r emr $indir --output-dir $outdir/followertable --no-output;
 python ldapreprocesspostprocess.py $numtopics; #run this in a post-script after FollowersTable
 python RunHive.py emr $outdir
