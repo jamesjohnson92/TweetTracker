@@ -16,7 +16,7 @@ This has the excellent property that, given an observation $x_{s,u} = (u,s,a_{s,
 This means that SGD will be real easy to map-reduce!  We don't need no fancy library! 
 
 Specifically, the mapper gets the tuple $(u,s,b_{s,u},\tau_s,\phi_{\tau_s,u},\alpha_s)$ where the last two values are the current estimates.
-It outputs $((u,s,\tau_s,$'$a$'$),b_{s,u},\phi_{\tau_s,u},\alpha_s)$ and $((u,s,\tau_s,$'$b$'$),b_{s,u},\phi_{\tau_s,u},\alpha_s)$.
+It outputs $((s,$'$a$'$),(\tau_s,u,b_{s,u},\phi_{\tau_s,u},\alpha_s))$ and $((u,\tau_s,$'$b$'$),(s,b_{s,u},\phi_{\tau_s,u},\alpha_s))$.
 The reducer then forms the obvious sum and outputs the new values of $\phi_{\tau_s,u}$ and $\alpha_s$.
 Then a second stage (or a hive job) joins the results.  See \texttt{src/AlphaPhi/SGD.py}.  
 
