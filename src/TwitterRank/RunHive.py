@@ -17,7 +17,7 @@ def wait_until(pred, timeout, period=30):
 
 if __name__ == "__main__":
 	if sys.argv[1] == "emr":
-		s3_query_file_uri = u's3://twittsomethingsomethingsomethingsomething'
+		s3_query_file_uri = u's3://mrldajarbucket/ldapostprocess_stub.q'
 		args1 = [u's3://us-east-1.elasticmapreduce/libs/hive/hive-script',
 				 u'--base-path',
 				 u's3://us-east-1.elasticmapreduce/libs/hive/',
