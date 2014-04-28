@@ -7,7 +7,7 @@ USERID_PREFIX = 'id:twitter.com:'
 
 class MRFollowers(MRJob):
 
-    INPUT_PROTOCOL = JSONValueProtocol 
+    INPUT_PROTOCOL = JSONValueProtocol
     MAPPER_OUTPUT_PROTOCOL = RawValueProtocol
     OUTPUT_PROTOCOL = RawValueProtocol
 
@@ -24,6 +24,8 @@ class MRFollowers(MRJob):
             tweeterStatusesCount = tweet['object']['actor']['statusesCount'] # TODO: localize this by sampling it? how often have you tweeted RECENTLY?
             user = tweet['actor']['id'][len(USERID_PREFIX) :]
             yield None, ('%d %d %d ' % (int(user), int(tweeter) , int(tweeterStatusesCount))) # the space at the end is important!!!! #blackmagic
+
+	########add the postscript ldapreprocesspostprocess.py
 
 
 if __name__ == '__main__':

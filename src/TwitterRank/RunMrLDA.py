@@ -20,6 +20,11 @@ def wait_until(pred, timeout, period=30):
 if __name__ == "__main__":
 	if sys.argv[1] == "emr":
 		conn = boto.emr.connect_to_region(something)
+		mrlda_jar = u's3://somethingsomethingsomethingsomething'
+		class_1 = u'cc.mrlda.ParseCorpus'
+		class_2 = u'cc.mrlda.VariationalInference'
+		class_3 = u'cc.mrlda.DisplayDocument'
+###do the args properly
 		args1 = [u's3://us-east-1.elasticmapreduce/libs/hive/hive-script',
 				 u'--base-path',
 				 u's3://us-east-1.elasticmapreduce/libs/hive/',
@@ -36,15 +41,13 @@ if __name__ == "__main__":
 				 u'-f',
 				 s3_query_file_uri]
 		steps = []
-		for name, args in zip(('Setup Hive','Run Hive Script'),(args1,args2)):
+		for name, args in zip(('Parse Corpus','Variational Inference','Display Document'),(args1,args2,args3)):
 			step = JarStep(name,
 						   's3://us-east-1.elasticmapreduce/libs/script-runner/script-runner.jar',
 						   step_args=args,
 						   #action_on_failure="CANCEL_AND_WAIT"
 						   )
-			#should be inside loop
 			steps.append(step)
-# Kick off the job
 		jobid = conn.run_jobflow(name, s3_log_uri,
 										   steps=steps,
 										   master_instance_type=master_instance_type,
