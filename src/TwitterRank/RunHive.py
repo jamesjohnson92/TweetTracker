@@ -1,4 +1,4 @@
-import boto, sys, time
+import boto, boto.emr, sys, time
 from subprocess import call
 
 def check_connection(conn, jobid):
@@ -43,7 +43,7 @@ if __name__ == "__main__":
             steps.append(step)
         master_instance_type = "m3.xlarge"
         slave_instance_type = "m3.xlarge"
-        jobid = conn.run_jobflow(name, s3_log_uri,
+        jobid = conn.run_jobflow(name, log_uri=None,
                                            steps=steps,
                                            master_instance_type=master_instance_type,
                                            slave_instance_type=slave_instance_type,

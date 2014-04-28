@@ -1,4 +1,4 @@
-import boto, sys, time
+import boto, boto.emr, sys, time
 from subprocess import call
 
 def check_connection(conn, jobid):
@@ -17,7 +17,7 @@ def wait_until(pred, timeout, period=30):
 if __name__ == "__main__":
     if sys.argv[1] == "emr":
         conn = boto.emr.connect_to_region("us-west-2") #oregon
-        mrlda_jar = u's3://mrldajarbucket/Mr.LDA-0.0.1.jar'
+        mrldajar = u's3://mrldajarbucket/Mr.LDA-0.0.1.jar'
         outdir = unicode(sys.argv[3])
         nummappers = unicode(sys.argv[4])
         numreducers = unicode(sys.argv[5])
@@ -57,7 +57,7 @@ if __name__ == "__main__":
         master_instance_type = "m3.xlarge"
         slave_instance_type = "m3.xlarge"
         num_instances = nummappers
-        jobid = conn.run_jobflow(name, s3_log_uri,
+        jobid = conn.run_jobflow(name, log_uri=None,
                                            steps=steps,
                                            master_instance_type=master_instance_type,
                                            slave_instance_type=slave_instance_type,
