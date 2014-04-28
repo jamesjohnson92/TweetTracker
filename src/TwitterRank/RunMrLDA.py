@@ -1,8 +1,5 @@
 import boto, sys, time
 from subprocess import call
-#hadoop jar $mrldajar cc.mrlda.ParseCorpus -input $outdir/corpus -output $outdir/p
-#hadoop jar $mrldajar cc.mrlda.VariationalInference -input $outdir/parsecorpus/doc
-#hadoop jar $mrldajar cc.mrlda.DisplayDocument -input $outdir/ldapreout/gamma-30 -
 
 def check_connection(conn, jobid):
 	status = conn.describe_jobflow(jobid)
@@ -19,27 +16,39 @@ def wait_until(pred, timeout, period=30):
 
 if __name__ == "__main__":
 	if sys.argv[1] == "emr":
-		conn = boto.emr.connect_to_region(something)
-		mrlda_jar = u's3://somethingsomethingsomethingsomething'
+		conn = boto.emr.connect_to_region("us-west-2") #oregon
+		mrlda_jar = u's3://mrldajarbucket/Mr.LDA-0.0.1.jar'
+		outdir = sys.argv[3]
+		nummappers = sys.argv[4]
+		numreducers = sys.argv[5]
+		numtopics = sys.argv[6]
+		stopwords = sys.argv[7]
 		class_1 = u'cc.mrlda.ParseCorpus'
 		class_2 = u'cc.mrlda.VariationalInference'
 		class_3 = u'cc.mrlda.DisplayDocument'
-###do the args properly
-		args1 = [u's3://us-east-1.elasticmapreduce/libs/hive/hive-script',
-				 u'--base-path',
-				 u's3://us-east-1.elasticmapreduce/libs/hive/',
-				 u'--install-hive',
-				 u'--hive-versions',
-				 u'0.7']
-		args2 = [u's3://us-east-1.elasticmapreduce/libs/hive/hive-script',
-				 u'--base-path',
-				 u's3://us-east-1.elasticmapreduce/libs/hive/',
-				 u'--hive-versions',
-				 u'0.7',
-				 u'--run-hive-script',
-				 u'--args',
-				 u'-f',
-				 s3_query_file_uri]
+		args1 = [mrldajar, class_1,
+				 u'-input',
+				 outdir + "/corpus",
+				 u'-output',
+				 outdir + "/parsecorpus",
+				 u'-mapper',
+				 nummappers,
+				 u'-reducer',
+				 numreducers]
+		args2 = [mrldajar, class_2,
+				 u'-input',
+				 outdir + "/parsecorpus/document",
+				 u'-output',
+				 outdir + "/ldapreout",
+				 u'-mapper',
+				 nummappers,
+				 u'-reducer',
+				 numreducers]
+		args3 = [mrldajar, class_3,
+				 u'-input',
+				 outdir + "/ldapreout/gamma-30",
+				 u'-output',
+				 outdir + "/ldaout"]
 		steps = []
 		for name, args in zip(('Parse Corpus','Variational Inference','Display Document'),(args1,args2,args3)):
 			step = JarStep(name,

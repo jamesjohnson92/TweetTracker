@@ -1,6 +1,5 @@
 import boto, sys, time
 from subprocess import call
-#hive -hiveconf TROPATH=$outdir -f ldapostprocess.q;
 
 def check_connection(conn, jobid):
 	status = conn.describe_jobflow(jobid)
@@ -17,6 +16,7 @@ def wait_until(pred, timeout, period=30):
 
 if __name__ == "__main__":
 	if sys.argv[1] == "emr":
+		conn = boto.emr.connect_to_region("us-west-2") #oregon
 		s3_query_file_uri = u's3://mrldajarbucket/ldapostprocess_stub.q'
 		args1 = [u's3://us-east-1.elasticmapreduce/libs/hive/hive-script',
 				 u'--base-path',
@@ -41,7 +41,7 @@ if __name__ == "__main__":
 						   #action_on_failure="CANCEL_AND_WAIT"
 						   )
 			steps.append(step)
-		jobid = EmrConnection().run_jobflow(name, s3_log_uri,
+		jobid = conn.run_jobflow(name, s3_log_uri,
 										   steps=steps,
 										   master_instance_type=master_instance_type,
 										   slave_instance_type=slave_instance_type,

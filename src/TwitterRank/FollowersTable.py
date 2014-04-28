@@ -25,8 +25,6 @@ class MRFollowers(MRJob):
             user = tweet['actor']['id'][len(USERID_PREFIX) :]
             yield None, ('%d %d %d ' % (int(user), int(tweeter) , int(tweeterStatusesCount))) # the space at the end is important!!!! #blackmagic
 
-	########add the postscript ldapreprocesspostprocess.py
-
 
 if __name__ == '__main__':
     MRFollowers.run()
