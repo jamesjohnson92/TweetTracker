@@ -18,32 +18,29 @@ if __name__ == "__main__":
     if sys.argv[1] == "emr":
         conn = boto.emr.connect_to_region("us-west-2") #oregon
         mrlda_jar = u's3://mrldajarbucket/Mr.LDA-0.0.1.jar'
-        outdir = sys.argv[3]
-        nummappers = sys.argv[4]
-        numreducers = sys.argv[5]
-        numtopics = sys.argv[6]
-        stopwords = sys.argv[7]
+        outdir = unicode(sys.argv[3])
+        nummappers = unicode(sys.argv[4])
+        numreducers = unicode(sys.argv[5])
+        numtopics = unicode(sys.argv[6])
+        stopwords = unicode(sys.argv[7])
         class_1 = u'cc.mrlda.ParseCorpus'
         class_2 = u'cc.mrlda.VariationalInference'
         class_3 = u'cc.mrlda.DisplayDocument'
+
         args1 = [mrldajar, class_1,
-                 u'-input',
-                 outdir + "/corpus",
-                 u'-output',
-                 outdir + "/parsecorpus",
-                 u'-mapper',
-                 nummappers,
-                 u'-reducer',
-                 numreducers]
+                 u'-input', outdir + "/corpus",
+                 u'-output', outdir + "/parsecorpus",
+                 u'-mapper', nummappers,
+                 u'-reducer', numreducers,
+                 u'-stoplist', stopwords]
         args2 = [mrldajar, class_2,
-                 u'-input',
-                 outdir + "/parsecorpus/document",
-                 u'-output',
-                 outdir + "/ldapreout",
-                 u'-mapper',
-                 nummappers,
-                 u'-reducer',
-                 numreducers]
+                 u'-input',  outdir + "/parsecorpus/document",
+                 u'-output', outdir + "/ldapreout",
+                 u'-mapper', nummappers,
+                 u'-reducer', numreducers,
+                 u'-term', u'10000',
+                 u'-topic', numtopics,
+                 u'-directemit']
         args3 = [mrldajar, class_3,
                  u'-input',
                  outdir + "/ldapreout/gamma-30",
@@ -51,12 +48,15 @@ if __name__ == "__main__":
                  outdir + "/ldaout"]
         steps = []
         for name, args in zip(('Parse Corpus','Variational Inference','Display Document'),(args1,args2,args3)):
-            step = JarStep(name,
+            step = boto.emr.JarStep(name,
                            's3://us-east-1.elasticmapreduce/libs/script-runner/script-runner.jar',
                            step_args=args,
                            #action_on_failure="CANCEL_AND_WAIT"
                            )
             steps.append(step)
+        master_instance_type = "m3.xlarge"
+        slave_instance_type = "m3.xlarge"
+        num_instances = nummappers
         jobid = conn.run_jobflow(name, s3_log_uri,
                                            steps=steps,
                                            master_instance_type=master_instance_type,

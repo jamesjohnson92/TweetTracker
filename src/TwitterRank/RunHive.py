@@ -18,34 +18,36 @@ if __name__ == "__main__":
     if sys.argv[1] == "emr":
         conn = boto.emr.connect_to_region("us-west-2") #oregon
         s3_query_file_uri = u's3://mrldajarbucket/ldapostprocess_stub.q'
-        args1 = [u's3://us-east-1.elasticmapreduce/libs/hive/hive-script',
+        args1 = [u's3://us-west-2.elasticmapreduce/libs/hive/hive-script',
                  u'--base-path',
-                 u's3://us-east-1.elasticmapreduce/libs/hive/',
+                 u's3://us-west-2.elasticmapreduce/libs/hive/',
                  u'--install-hive',
                  u'--hive-versions',
-                 u'0.7']
-        args2 = [u's3://us-east-1.elasticmapreduce/libs/hive/hive-script',
+                 u'0.11.0.2']
+        args2 = [u's3://us-west-2.elasticmapreduce/libs/hive/hive-script',
                  u'--base-path',
-                 u's3://us-east-1.elasticmapreduce/libs/hive/',
+                 u's3://us-west-2.elasticmapreduce/libs/hive/',
                  u'--hive-versions',
-                 u'0.7',
+                 u'0.11.0.2',
                  u'--run-hive-script',
                  u'--args',
                  u'-f',
                  s3_query_file_uri]
         steps = []
         for name, args in zip(('Setup Hive','Run Hive Script'),(args1,args2)):
-            step = JarStep(name,
-                           's3://us-east-1.elasticmapreduce/libs/script-runner/script-runner.jar',
+            step = boto.emr.JarStep(name,
+                           's3://us-west-2.elasticmapreduce/libs/script-runner/script-runner.jar',
                            step_args=args,
                            #action_on_failure="CANCEL_AND_WAIT"
                            )
             steps.append(step)
+        master_instance_type = "m3.xlarge"
+        slave_instance_type = "m3.xlarge"
         jobid = conn.run_jobflow(name, s3_log_uri,
                                            steps=steps,
                                            master_instance_type=master_instance_type,
                                            slave_instance_type=slave_instance_type,
-                                           num_instances=num_instances,
+                                           num_instances=5,
                                            hadoop_version="0.20")
         wait_until(lambda: check_connection(conn, jobid), 86400)
     else:
