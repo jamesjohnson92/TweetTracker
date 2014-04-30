@@ -1,69 +1,71 @@
 import boto, boto.emr, sys, time
 from subprocess import call
-
-def check_connection(conn, jobid):
-    status = conn.describe_jobflow(jobid)
-    #terminal state
-    if status in [u'COMPLETED', u'FAILED', u'TERMINATED']:
-        return True
-    return False
-
-def wait_until(pred, timeout, period=30):
-    mustend = time.time() + timeout
-    while time.time() < mustend:
-        if pred(): return True
-        time.sleep(period)
+from utils import *
 
 if __name__ == "__main__":
     if sys.argv[1] == "emr":
-        conn = boto.emr.connect_to_region("us-west-2") #oregon
-        mrldajar = u's3://mrldajarbucket/Mr.LDA-0.0.1.jar'
+        conn = boto.emr.connect_to_region("us-east-1") #north virginia
+        log_uri = u's3://tweettrack/Twitterrank_Log/LDA_log'
+        mrldajar = unicode(sys.argv[2])
         outdir = unicode(sys.argv[3])
         nummappers = unicode(sys.argv[4])
         numreducers = unicode(sys.argv[5])
         numtopics = unicode(sys.argv[6])
         stopwords = unicode(sys.argv[7])
-        class_1 = u'cc.mrlda.ParseCorpus'
-        class_2 = u'cc.mrlda.VariationalInference'
-        class_3 = u'cc.mrlda.DisplayDocument'
+        class1 = u'cc.mrlda.ParseCorpus'
+        class2 = u'cc.mrlda.VariationalInference'
+        class3 = u'cc.mrlda.DisplayDocument'
+        #classes = (class1,)
+        classes = (class1, class2, class3)
 
-        args1 = [mrldajar, class_1,
-                 u'-input', outdir + "/corpus",
-                 u'-output', outdir + "/parsecorpus",
+        args1 = [
+                 u'-input', outdir + "corpus",
+                 u'-output', outdir + "parsecorpus",
                  u'-mapper', nummappers,
                  u'-reducer', numreducers,
                  u'-stoplist', stopwords]
-        args2 = [mrldajar, class_2,
-                 u'-input',  outdir + "/parsecorpus/document",
-                 u'-output', outdir + "/ldapreout",
+        args2 = [
+                 u'-input',  outdir + "parsecorpus/document",
+                 u'-output', outdir + "ldapreout",
                  u'-mapper', nummappers,
                  u'-reducer', numreducers,
                  u'-term', u'10000',
                  u'-topic', numtopics,
                  u'-directemit']
-        args3 = [mrldajar, class_3,
+        args3 = [
                  u'-input',
-                 outdir + "/ldapreout/gamma-30",
+                 outdir + "ldapreout/gamma-30",
                  u'-output',
-                 outdir + "/ldaout"]
+                 outdir + "ldaout"]
+        #args = (args1,)
+        args = (args1, args2, args3)
         steps = []
-        for name, args in zip(('Parse Corpus','Variational Inference','Display Document'),(args1,args2,args3)):
-            step = boto.emr.JarStep(name,
-                           's3://us-east-1.elasticmapreduce/libs/script-runner/script-runner.jar',
-                           step_args=args,
+        #names = ("Parse Corpus",)
+        names = ("Parse Corpus", "Variational Inference", "Display Document")
+        for i in xrange(3):
+            step = boto.emr.JarStep(names[i],
+                           mrldajar,
+                           main_class=classes[i],
+                           step_args=args[i],
                            #action_on_failure="CANCEL_AND_WAIT"
                            )
             steps.append(step)
         master_instance_type = "m3.xlarge"
         slave_instance_type = "m3.xlarge"
-        num_instances = nummappers
-        jobid = conn.run_jobflow(name, log_uri=None,
+        num_instances = 2
+        step_args = [conn._build_step_args(step) for step in steps]
+        print step_args
+        """
+        jobid = conn.run_jobflow("Mr LDA", log_uri=log_uri,
                                            steps=steps,
                                            master_instance_type=master_instance_type,
                                            slave_instance_type=slave_instance_type,
                                            num_instances=num_instances,
-                                           hadoop_version="0.20")
+                                           enable_debugging=True,
+                                           ami_version="latest",
+                                           hadoop_version="2.2.0")
         wait_until(lambda: check_connection(conn, jobid), 86400)
+        """
     else:
         """
         Without elastic map reduce
