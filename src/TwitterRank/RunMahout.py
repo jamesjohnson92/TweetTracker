@@ -5,41 +5,53 @@ from utils import *
 if __name__ == "__main__":
     if sys.argv[1] == "emr":
         conn = boto.emr.connect_to_region("us-east-1") #north virginia
-        log_uri = u's3://tweettrack/Twitterrank_Log/LDA_log'
+        log_uri = u's3n://tweettrack/Twitterrank_Log/LDA_log'
         mahoutjar = unicode(sys.argv[2])
         outdir = unicode(sys.argv[3])
         nummappers = unicode(sys.argv[4])
         numreducers = unicode(sys.argv[5])
         numtopics = unicode(sys.argv[6])
         stopwords = unicode(sys.argv[7])
-        class1 = u'org.apache.mahout.clustering.lda.cvb'
-        classes = (class1,)
-        #classes = (class1, class2, class3)
 
-        args1 = [
+		jars = (s3distcpjar, mahoutjar, mahoutjar, mahoutjar, s3distcpjar)
+		class1 = u'stuff'
+        class2 = u'org.apache.mahout.text.SequenceFilesFromDirectory'
+        class3 = u'org.apache.mahout.vectorizer.SparseVectorsFromSequenceFiles'
+        class4 = u'org.apache.mahout.clustering.lda.cvb.CVB0Driver'
+		class5 = u'stuff'
+        classes = (class1, class2, class3, class4, class5)
+		args1 = []
+        args2 = [
                  u'--input', outdir + "corpus",
+                 u'--output', outdir + "seqfiles",
+                 u'-c', u'UTF-8'
+                ]
+        args3 = [
+                 u'--input', outdir + "seqfiles",
+                 u'--output', outdir + "vecs",
+                 u'-wt', u't'
+                ]
+        args4 = [
+                 u'--input', outdir + "vecs",
                  u'--output', outdir + "ldaout",
                  u'--num_reduce_tasks', numreducers,
                  u'--num_terms', u'10000',
+                 u'--maxIter', u'3000',
                  u'--num_topics', numtopics]
-        args = (args1,)
-        #args = (args1, args2, args3)
+		args4 = []
+        args = (args1, args2, args3, args4, args5)
         steps = []
-        names = ("Mahout Job",)
-        #names = ("Parse Corpus", "Variational Inference", "Display Document")
-        for i in xrange(1):
+        names = ("Copy to hdfs", "Convert to SequenceFile", "Sequence File to Parsed", "Mahout Job", "Copy from hdfs")
+        for i in xrange(5):
             step = boto.emr.JarStep(names[i],
-                           mahoutjar,
+                           jars[i],
                            main_class=classes[i],
                            step_args=args[i],
-                           #action_on_failure="CANCEL_AND_WAIT"
                            )
             steps.append(step)
         master_instance_type = "m3.xlarge"
         slave_instance_type = "m3.xlarge"
         num_instances = 2
-        #step_args = [conn._build_step_args(step) for step in steps]
-        #print step_args
         jobid = conn.run_jobflow("Mahout", log_uri=log_uri,
                                            steps=steps,
                                            master_instance_type=master_instance_type,
@@ -61,4 +73,5 @@ if __name__ == "__main__":
         numreducers = sys.argv[5]
         numtopics = sys.argv[6]
         stopwords = sys.argv[7]
-        call(["hadoop", "jar", mahoutjar, "org.apache.mahout.clustering.lda.cvb"]) ###figure this out later
+        call(["hadoop", "jar", mahoutjar, "org.apache.mahout.clustering.lda.cvb"])
+        ###figure this out later, params are fucked and other stuff

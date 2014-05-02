@@ -17,6 +17,6 @@ class GenerateCorpus(MRJob):
     def reducer(self, user, tweets):
         yield user, ' '.join(tweets)
 
-                
+
 if __name__ == '__main__':
     GenerateCorpus.run()

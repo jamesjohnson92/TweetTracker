@@ -1,11 +1,12 @@
 #!/bin/sh
 
-indir='s3://tweettrack/Twitter_Teacup/';
-outdir='s3://tweettrack/Twitterrank_Output/';
+indir='s3n://tweettrack/Twitter_Teacup/';
+outdir='s3n://tweettrack/Twitterrank_Output/';
+temp_hdfs_dir='hdfs:///stuff';
 numtopics=30;
 nummappers=3;
 numreducers=3;
-mrldajar='s3n://mrldajarbucket/mahout-core-0.9-job.jar'; ##mahout jar
+mrldajar='s3n://mrldajarbucket/mahout-examples-1.0-SNAPSHOT-job.jar'; ##mahout jar
 stopwords='s3n://mrldajarbucket/stopwords';
 setnums='--jobconf mapreduce.map.tasks=5 --jobconf mapreduce.reduce.tasks=5 --num-ec2-instances 6 --ec2-instance-type m3.xlarge'
 
