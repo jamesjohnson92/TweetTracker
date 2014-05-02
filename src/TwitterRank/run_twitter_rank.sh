@@ -5,12 +5,12 @@ outdir='s3://tweettrack/Twitterrank_Output/';
 numtopics=30;
 nummappers=3;
 numreducers=3;
-mrldajar='s3n://mrldajarbucket/Mr.LDA-0.0.1.jar';
+mrldajar='s3n://mrldajarbucket/mahout-core-0.9-job.jar'; ##mahout jar
 stopwords='s3n://mrldajarbucket/stopwords';
 setnums='--jobconf mapreduce.map.tasks=5 --jobconf mapreduce.reduce.tasks=5 --num-ec2-instances 6 --ec2-instance-type m3.xlarge'
 
 #python GenerateCorpus.py $setnums -r emr $indir --output-dir $outdir/corpus --no-output;
-python RunMrLDA.py emr $mrldajar $outdir $nummappers $numreducers $numtopics $stopwords #don't need no-output
+python RunMahout.py emr $mrldajar $outdir $nummappers $numreducers $numtopics $stopwords #don't need no-output
 #python FollowersTable.py  $setnums -r emr $indir --output-dir $outdir/followertable | python ldapreprocesspostprocess.py $numtopics;
 #send to s3
 #python RunHive.py emr $outdir #don't need no-output
