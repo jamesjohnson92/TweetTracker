@@ -1,7 +1,7 @@
 from mrjob.job import MRJob
 import json as simplejson
 
-TWEETID_PREFIX = 'tag:search.twitter.com,2005'
+TWEETID_PREFIX = 'tag:search.twitter.com,2005:'
 
 class GenerateTweetCorpus(MRJob):
 
