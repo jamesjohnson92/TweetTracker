@@ -30,15 +30,16 @@ if __name__ == "__main__":
                            #action_on_failure="CANCEL_AND_WAIT"
                            )
             steps.append(step)
-        master_instance_type = "m1.small"
-        slave_instance_type = "m1.xlarge"
+        master_instance_type = "m3.xlarge"
+        slave_instance_type = "m3.xlarge"
         jobid = conn.run_jobflow(name, log_uri=log_uri,
                                            steps=steps,
                                            master_instance_type=master_instance_type,
                                            slave_instance_type=slave_instance_type,
-                                           num_instances=5,
+                                           num_instances=3,
                                            enable_debugging=True,
-                                           hadoop_version="0.20")
+                                           ami_version="latest",
+                                           hadoop_version="2.2.0")
         wait_until(lambda: check_connection(conn, jobid), 86400)
     else:
         """

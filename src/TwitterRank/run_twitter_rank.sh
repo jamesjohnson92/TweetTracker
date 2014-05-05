@@ -16,6 +16,6 @@ setnums='--jobconf mapreduce.map.tasks=5 --jobconf mapreduce.reduce.tasks=5 --nu
 #python RunMrJobs.py emr $mrldajar $outdir $nummappers $numreducers $numtopics $stopwords $temphdfsdir $s3distcpjar;
 #python FollowersTable.py  $setnums -r emr $indir --output-dir $outdir/followertable | python ldapreprocesspostprocess.py $numtopics;
 #s3cmd put something something something0
-python RunHive.py emr $outdir $temphdfsdir $s3distcpjar;
+python RunHive.py emr $outdir;
 #python GenerateGraph.py  $setnums -r emr $outdir/pregraph --numtopics $numtopics --sumgamma $outdir/gammasums/000000_0 --output-dir $outdir/graph --no-output;
 #python GraphRank.py  $setnums -r emr $outdir/graph --output-dir $outdir/twitterrank --no-output;
