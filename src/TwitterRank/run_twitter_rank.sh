@@ -11,7 +11,7 @@ mahoutjar='s3n://mrldajarbucket/mahout-examples-1.0-SNAPSHOT-job.jar'; ##mahout 
 mrldajar='s3n://mrldajarbucket/Mr.LDA-0.0.1.jar';
 s3distcpjar='/home/hadoop/lib/emr-s3distcp-1.0.jar' #cluster itself's home
 stopwords='s3n://mrldajarbucket/stopwords';
-setnums='--jobconf mapreduce.map.tasks=5 --jobconf mapreduce.reduce.tasks=5 --num-ec2-instances 3 --ec2-instance-type m3.xlarge'
+setnums='--jobconf mapreduce.map.tasks=5 --jobconf mapreduce.reduce.tasks=5 --num-ec2-instances 6 --ec2-instance-type m3.xlarge'
 
 #python GenerateCorpus.py $setnums -r emr $indir --output-dir $outdir/corpus --no-output;
 #python RunMrJobs.py emr $mrldajar $outdir $nummappers $numreducers $numtopics $stopwords $temphdfsdir $s3distcpjar;
