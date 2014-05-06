@@ -18,7 +18,7 @@ if __name__ == "__main__":
                                            steps=steps,
                                            master_instance_type=master_instance_type,
                                            slave_instance_type=slave_instance_type,
-                                           num_instances=3,
+                                           num_instances=6,
                                            enable_debugging=True,
                                            ami_version="latest",
                                            hadoop_version="2.2.0")

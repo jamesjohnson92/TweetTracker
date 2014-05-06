@@ -46,13 +46,14 @@ class GenerateTRGraph(MRJob):
         src_gamma_sum = sum(src_gamma)
         for line in vals:
             if line == 'no_val':
-                continue
-            splitline = line.split(' ')
-            trg = int(splitline[0])
-            trg_num_tweets = int(splitline[1])
-            out_tweets += trg_num_tweets
-            trg_gamma = map(float, splitline[2:])
-            links.append((trg, trg_num_tweets, trg_gamma))
+                pass
+            else:
+                splitline = line.split(' ')
+                trg = int(splitline[0])
+                trg_num_tweets = int(splitline[1])
+                out_tweets += trg_num_tweets
+                trg_gamma = map(float, splitline[2:])
+                links.append((trg, trg_num_tweets, trg_gamma))
 
         for i in xrange(len(links)):
             trg = links[i][0]

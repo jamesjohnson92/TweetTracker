@@ -43,7 +43,7 @@ select twittergraph.follower_id as follower_id,
        follower_gammas.gam0 as follower_gam0, follower_gammas.gam1 as follower_gam1, follower_gammas.gam2 as follower_gam2, follower_gammas.gam3 as follower_gam3, follower_gammas.gam4 as follower_gam4,
        twittergraph.friend_id as friend_id, 
        twittergraph.tweet_count as tweet_count, 
-       friend_gammas.gam0 as friend_gam0, friend_gammas.gam1 as friend_gam1, friend_gammas.gam2 as friend_gam2, friend_gammas.gam3 as friend_gam3, friend_gammas.gam4 as friend_gam4,
+       friend_gammas.gam0 as friend_gam0, friend_gammas.gam1 as friend_gam1, friend_gammas.gam2 as friend_gam2, friend_gammas.gam3 as friend_gam3, friend_gammas.gam4 as friend_gam4
 from twittergammas friend_gammas 
      join twittergraph
      join twittergammas follower_gammas
