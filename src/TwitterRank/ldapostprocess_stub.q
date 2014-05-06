@@ -13,37 +13,37 @@ location '${hiveconf:TROPATH}/followertable';
 
 create external table twittergammas(
        twitter_id bigint, 
-       __GAMMAS__)
+       GAMMAS decimal)
 ROW FORMAT DELIMITED FIELDS TERMINATED BY ' ' LINES TERMINATED BY '\n'
 STORED AS TEXTFILE
 location '${hiveconf:TROPATH}/ldaout';
 
 create external table pregraphout (
        follower_id bigint,
-       __FOLLOWER_GAMMAS__,
+       FOLLOWER_GAMMAS decimal,
        friend_id bigint,
        tweet_count bigint,
-       __FRIEND_GAMMAS__)
+       FRIEND_GAMMAS decimal)
 ROW FORMAT DELIMITED FIELDS TERMINATED BY ' ' LINES TERMINATED BY '\n'
 STORED AS TEXTFILE
 location '${hiveconf:TROPATH}/pregraph';
 
 create external table gamma_sums_out (
-       __GAMMAS__)
+       GAMMAS decimal)
 ROW FORMAT DELIMITED FIELDS TERMINATED BY ' ' LINES TERMINATED BY '\n'
 STORED AS TEXTFILE
 location '${hiveconf:TROPATH}/gammasums';
 
 insert into table gamma_sums_out
-select __GAMMA_SUMS__ 
+select GAMMA_SUMS 
 from twittergammas;
 
 insert into table pregraphout
 select twittergraph.follower_id as follower_id, 
-       __FOLLOWER_GAMMAS_AS__,
+       FOLLOWER_GAMMAS_AS,
        twittergraph.friend_id as friend_id, 
        twittergraph.tweet_count as tweet_count, 
-       __FRIEND_GAMMAS_AS__
+       FRIEND_GAMMAS_AS
 from twittergammas friend_gammas 
      join twittergraph
      join twittergammas follower_gammas

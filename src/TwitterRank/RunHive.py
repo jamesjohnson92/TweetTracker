@@ -5,34 +5,16 @@ from utils import *
 if __name__ == "__main__":
     if sys.argv[1] == "emr":
         conn = boto.emr.connect_to_region("us-east-1") #north virginia
-        s3_query_file_uri = u's3://mrldajarbucket/ldapostprocess_stub.q'
+        s3_query_file_uri = u's3://mrldajarbucket/ldapostprocess.q'
         log_uri = u's3://tweettrack/Twitterrank_Log/Hive_log'
-        args1 = [u's3://us-west-2.elasticmapreduce/libs/hive/hive-script',
-                 u'--base-path',
-                 u's3://us-west-2.elasticmapreduce/libs/hive/',
-                 u'--install-hive',
-                 u'--hive-versions',
-                 u'0.11.0.2']
-        args2 = [u's3://us-west-2.elasticmapreduce/libs/hive/hive-script',
-                 u'--base-path',
-                 u's3://us-west-2.elasticmapreduce/libs/hive/',
-                 u'--hive-versions',
-                 u'0.11.0.2',
-                 u'--run-hive-script',
-                 u'--args',
-                 u'-f',
-                 s3_query_file_uri]
-        steps = []
-        for name, args in zip(('Setup Hive','Run Hive Script'),(args1,args2)):
-            step = boto.emr.JarStep(name,
-                           's3://us-west-2.elasticmapreduce/libs/script-runner/script-runner.jar',
-                           step_args=args,
-                           #action_on_failure="CANCEL_AND_WAIT"
-                           )
-            steps.append(step)
+        postprocess_args = ["-hiveconf","TROPATH=%s" % sys.argv[2]]
+        print postprocess_args
+        step1 = boto.emr.step.InstallHiveStep()
+        step2 = boto.emr.step.HiveStep("Run lda postprocess hive", s3_query_file_uri, hive_args=postprocess_args)
+        steps = [step1, step2]
         master_instance_type = "m3.xlarge"
         slave_instance_type = "m3.xlarge"
-        jobid = conn.run_jobflow(name, log_uri=log_uri,
+        jobid = conn.run_jobflow("Hive step, bro", log_uri=log_uri,
                                            steps=steps,
                                            master_instance_type=master_instance_type,
                                            slave_instance_type=slave_instance_type,
@@ -45,6 +27,9 @@ if __name__ == "__main__":
         """
         Without elastic map reduce
         """
+        pass
+        """
         assert sys.argv[2]
         outdir_str = "TROPATH=%s" % sys.argv[2]
         call(["hive", "-hiveconf", outdir_str, "-f", "ldapostprocess.q"])
+        """
