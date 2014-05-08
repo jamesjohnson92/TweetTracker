@@ -5,48 +5,33 @@ from utils import *
 if __name__ == "__main__":
     if sys.argv[1] == "emr":
         conn = boto.emr.connect_to_region("us-east-1") #north virginia
-        log_uri = u's3n://tweettrack/Twitterrank_Log/TweetTopics_log'
-        print sys.argv
+        log_uri = u's3n://tweettrack/Twitterrank_Log/LDA_log'
         mrjobsjar = unicode(sys.argv[2])
         outdir = unicode(sys.argv[3])
         nummappers = unicode(sys.argv[4])
         numreducers = unicode(sys.argv[5])
-        stopwords = unicode(sys.argv[6])
-        tempdir = unicode(sys.argv[7])
-        tempdir2 = unicode(sys.argv[8])
+        numtopics = unicode(sys.argv[6])
+        stopwords = unicode(sys.argv[7])
+        tempdir = unicode(sys.argv[8])
         s3distcpjar = unicode(sys.argv[9])
-        rankdir = unicode(sys.argv[10])
 
-        jars = (s3distcpjar, s3distcpjar, mrjobsjar, mrjobsjar, mrjobsjar, mrjobsjar)
-        class3 = u'cc.mrlda.ParseCorpus'
-        class4 = u'cc.mrlda.DisplayDocument'
-        class5 = u'cc.mrlda.DisplayBeta'
-        class6 = u'cc.mrlda.DisplayPrior'
-        classes = (None, None, class3, class4, class5, class6)
+        jars = (s3distcpjar, mrjobsjar, s3distcpjar)
+        class2 = u'cc.mrlda.ParseCorpus'
+        classes = (None, class2, None)
         args1 = [u'--src', outdir + "corpus",
                  u'--dest', tempdir + "corpus"]
-        args2 = [u'--src', rankdir + "parsecorpus/term",
-                 u'--dest', tempdir2 + "parsecorpus/term"]
-        args3 = [
-                u'-index', tempdir2 + "parsecorpus/term",
+        args2 = [
                 u'-input', tempdir + "corpus",
                 u'-output', tempdir + "parsecorpus",
                 u'-mapper', nummappers,
                 u'-reducer', numreducers,
                 u'-stoplist', stopwords]
-        args4 = [
-                u'-input', tempdir + "parsecorpus/document",
-                u'-output', outdir + "wordcounts"]
-        args5 = [
-                u'-input', rankdir + "ldapreout/beta-5",
-                u'-output', outdir + "wordprobs"]
-        args6 = [
-                u'-input', rankdir + "ldapreout/alpha-5",
-                u'-output', outdir + "priors"]
-        args = (args1, args2, args3, args4, args5, args6)
+        args3 = [u'--src', tempdir + "parsecorpus",
+                 u'--dest', outdir + "parsecorpus"]
+        args = (args1, args2, args3)
         steps = []
-        names = ("Copy indir to hdfs", "Copy rankdir to hdfs", "Parse Corpus", "Display Document", "Display Beta", "Display Priors")
-        for i in xrange(6):
+        names = ("Copy to hdfs", "Parse Corpus", "Copy from hdfs")
+        for i in xrange(3):
             step = boto.emr.JarStep(names[i],
                            jars[i],
                            main_class=classes[i],
@@ -55,8 +40,8 @@ if __name__ == "__main__":
             steps.append(step)
         master_instance_type = "m3.xlarge"
         slave_instance_type = "m3.xlarge"
-        num_instances = 6
-        jobid = conn.run_jobflow("Mr. LDA Doing TweetTopics and Hungering for the Souls of the Living", log_uri=log_uri,
+        num_instances = 7
+        jobid = conn.run_jobflow("Mr. LDA doing Parse Corpus only", log_uri=log_uri,
                                            steps=steps,
                                            master_instance_type=master_instance_type,
                                            slave_instance_type=slave_instance_type,
@@ -68,5 +53,17 @@ if __name__ == "__main__":
     else:
         pass
         """
-        Without elastic map reduce: explode now
+        Without elastic map reduce
+        """
+        """
+        for i in xrange(2, 8):
+            assert sys.argv[i]
+        mahoutjar = sys.argv[2]
+        outdir = sys.argv[3]
+        nummappers = sys.argv[4]
+        numreducers = sys.argv[5]
+        numtopics = sys.argv[6]
+        stopwords = sys.argv[7]
+        call(["hadoop", "jar", mahoutjar, "org.apache.mahout.clustering.lda.cvb"])
+        ###figure this out later, params are fucked and other stuff
         """

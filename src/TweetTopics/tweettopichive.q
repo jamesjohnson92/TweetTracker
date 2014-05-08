@@ -6,6 +6,10 @@ drop table if exists priors;
 drop table if exists maxlikes;
 drop table if exists tweettopics;
 
+set hive.input.format=org.apache.hadoop.hive.ql.io.HiveInputFormat;
+set mapred.map.tasks = 20;
+set hive.exec.parallel=true;
+
 create external table wordcounts(
        id bigint, 
        word bigint, 
