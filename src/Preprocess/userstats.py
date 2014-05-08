@@ -22,7 +22,7 @@ for line in f :
 
 	if language == 'en' :
 		for mention in tweet['twitter_entities']['user_mentions'] :
-			mid = mention['id']
+			mid = mention['id_str']
 			if mid in atmentionCounts :
 				atmentionCounts[mid] = atmentionCounts[mid] + 1
 			else :
