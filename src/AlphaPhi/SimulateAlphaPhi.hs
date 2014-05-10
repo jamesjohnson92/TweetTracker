@@ -41,13 +41,16 @@ readGraph filename = do
     
 type SimConsts = (Int,Double,Graph) -- (tweet,alpha,tau,graph)
 
-simulateAlphaPhi :: Int -> Graph -> GraphMetadata -> IO [Entry]
+simulateAlphaPhi :: Int -> Graph -> GraphMetadata -> IO ([Entry], [(Int, Double, Int)])
 simulateAlphaPhi num_tweets graph metadata = do
   let tweeterDist = categorical $ map (\(i,(_,_,p)) -> (p,i)) $ assocs metadata :: RVar Int
-  fmap concat $ forM [1..num_tweets] $ \tweet_id -> do
+  tweets <- forM [1..num_tweets] $ \i -> do
     tweeter <- sampleRVar tweeterDist :: IO Int
     alpha <- sampleRVar $ beta (fst3 $ metadata!tweeter) (snd3 $ metadata!tweeter)
+    return (i,alpha,tweeter)
+  res <- fmap concat $ forM tweets $ \(tweet_id,alpha,tweeter) -> do
     simulateTweet tweet_id alpha tweeter graph
+  return (res,tweets)
 
 simulateTweet :: Int -> Double -> Int -> Graph -> IO [Entry]
 simulateTweet tweet alpha poster graph = do
@@ -70,5 +73,8 @@ doit = do
   graph <- readGraph "jomat"
   let (1,n) = bounds graph
   md <- generateMetadata n
-  res <- simulateAlphaPhi 1000 graph md 
+  (res,alphas) <- simulateAlphaPhi 1000 graph md 
   writeFile "sap_out" $ unlines $ flip map res $ \(a,b,c) -> unwords $ map show [a,b,toInt c]
+  writeFile "alpha_out" $ unlines $ flip map alphas $ \(a,b,c) -> unwords $ [show a,show b]
+  writeFile "phi_out" $ unlines $ flip map (assocs graph) $ \(i,(phi,_)) ->  unwords $ [show i,show phi]
+  

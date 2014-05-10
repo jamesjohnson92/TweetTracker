@@ -20,3 +20,13 @@ writeRandMat <- function(name, size, con, prob, modprob)
   }
   write.matrix(res,name)
 }
+
+hessian <- function(x,y)
+{
+  res <- matrix(0,2,2)
+  res[1,1] = -y^2/(1-x*y)^2
+  res[2,2] = -x^2/(1-x*y)^2
+  res[2,1] = -1/(1-x*y)^2
+  res[1,2] = -1/(1-x*y)^2
+  return( res)
+}
