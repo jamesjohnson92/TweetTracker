@@ -1,0 +1,9 @@
+One journal entry for the interesting experience of MR debugging
+
+Obviously, 80\% of the debugging was in 20\% of the code: and this law applies recursively, meaning that I spent more than half my time on one percent of the code. Specifically, the interface between Boto and EMR.
+
+Boto is the modular python bindings for calling anything from AWS. I learned it at work, and it was still not overkill for the actual job even though we ended up spending so much time on it, since we really didn't want to call things from the actual AWS REST API. It's designed so that \emph{anything} you can do in AWS, you can do in Boto. We actually use Boto both implicitly and explicitly: MRJobs, in the EMR mode that it has, is a thick wrapper around Boto, but MRJobs is incompatible with running jars like Mr.LDA or Hive directly, so you need to do that by uploading the jar to S3 and using Boto.
+
+We appreciated MRJobs a lot, actually. Saved us a ton of time with niggling about with AWS configurations. However, Boto is at a lower layer (an intermediate layer, between the abstraction of MRJobs but above the abstraction of the REST API itself, which it calls). This meant that we had a crucial mistake with regards to the proper method for data locality. To wit, Amazon's Hive is actually kind of compatible with running on S3 (that is, running the code close to the data in S3), but with some subtle difficulties that made it impossible for our use case. Therefore, I used s3distcp to copy everything to HDFS, where it ran fine. Thanks to my old boss for the reminder. That took up conservatively speaking 35\% of my development time.
+
+Our big scaling problem will undoubtedly now be the Hive job and Mr.LDA, most probably Mr.LDA. However, it may be enough to throw more machines at it.
