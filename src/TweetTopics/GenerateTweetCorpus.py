@@ -17,7 +17,7 @@ class GenerateTweetCorpus(MRJob):
         for v in vals:
             yield key, v
             return #uniqueification
-                
+
 if __name__ == '__main__':
     GenerateTweetCorpus.run()
 
