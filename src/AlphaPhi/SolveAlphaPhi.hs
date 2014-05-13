@@ -12,7 +12,6 @@ import Control.Monad
 import qualified Data.Map as Map
 import System.Random
 
--- 303 Chiquita ave mt view #1
 
 epsilon = 0.001
 
