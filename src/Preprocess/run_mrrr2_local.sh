@@ -1,0 +1,1 @@
+python MRRetweetRate2.py -r emr 's3n://tweettrack/Twitter_Teacup/' --output-dir 's3n://tweettrack/TTR_Output/';

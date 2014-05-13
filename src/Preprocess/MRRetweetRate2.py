@@ -50,7 +50,7 @@ class MRRetweetRate(MRJob):
         num_frds = 0
         num_favs = 0
         for fols,frds,favs,t, rc, fc in timestamps :
-            if num_fols = None:
+            if num_fols == None:
                 num_fols = fols
                 num_frds = frds
                 num_favs = favs
