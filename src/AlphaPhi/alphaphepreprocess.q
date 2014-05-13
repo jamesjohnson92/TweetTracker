@@ -27,7 +27,7 @@ location '${hiveconf:APPATH}/alphaphiin';
 
 insert into twittergraph
 select distinct creator, tweeter
-from tweettable
+from tweettable;
 
 insert into alphaphiin
 select tweet_id, follower, max(follower = tweeter)

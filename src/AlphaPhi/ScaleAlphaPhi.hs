@@ -30,14 +30,14 @@ close_selector (_,f) = closeCDB f
   
 num_buckets = 16
               
-get_param :: ParamSelector -> Params -> Int -> IO Double
+get_param :: ParamSelector -> Params -> Integer -> IO Double
 get_param (f,db) ps s' = do
   [s] <- fmap (map $ decode. B.fromStrict ) $ getBS db $ B.toStrict $ encode s'
   bits <- readArray (f ps) (s`div`2)
   let m_bits = if s`mod`2 == 0 then bits`mod`num_buckets else bits`div`num_buckets
   return $ (fromIntegral m_bits) / (fromIntegral num_buckets-1)
 
-set_param :: ParamSelector -> Params -> Int -> Word8 -> IO ()
+set_param :: ParamSelector -> Params -> Integer -> Word8 -> IO ()
 set_param (f,db) ps i' b = do
   [i] <- fmap (map $ decode . B.fromStrict) $ getBS db $ B.toStrict $ encode i'
   let m_bits = if i`mod`2 == 0 then b else b * num_buckets
@@ -47,7 +47,7 @@ modifyArray a i f = (readArray a i) >>= (writeArray a i . f)
 
 a//b = (fromIntegral a)/(fromIntegral b)
 
-update_param :: Double -> [Int] -> IOUArray Word8 Double -> (Int -> IO Double) -> (Word8 -> IO ()) -> IO ()
+update_param :: Double -> [Integer] -> IOUArray Word8 Double -> (Integer -> IO Double) -> (Word8 -> IO ()) -> IO ()
 update_param targ nrts_ix potentials readParam writeParam = do
   forM [0..num_buckets-1] $ (flip (writeArray potentials) 0)
   forM nrts_ix $ \i -> do
@@ -74,23 +74,21 @@ randomInit alpha_file phi_file = do
   
   alphas <- fmap (map head . map words . lines) $ readFile alpha_file
   flip makeCDB "alpha.cdb" $ do  
-    forM_ (zip [0:: Int ..] alphas) $ \(i,a) -> addBS (B.toStrict $ encode $ (read a :: Int)) (B.toStrict $ encode i)
+    forM_ (zip [0:: Int ..] alphas) $ \(i,a) -> addBS (B.toStrict $ encode $ (read a :: Integer)) (B.toStrict $ encode i)
     
   phis <- fmap (head . map words . lines) $ readFile phi_file
   flip makeCDB "phi.cdb" $ do
-    forM_ (zip [0:: Int ..] phis ) $ \(i,a) -> addBS (B.toStrict $ encode $ (read a :: Int)) (B.toStrict $ encode i)
+    forM_ (zip [0:: Int ..] phis ) $ \(i,a) -> addBS (B.toStrict $ encode $ (read a :: Integer)) (B.toStrict $ encode i)
 
-  alphas <- newArray (0,(num_as`div`2) + (num_as`mod`2) - 1) 0
-  phis <- newArray (0,(num_ps`div`2) + (num_ps`mod`2) - 1) 0
+  alphas <- newArray (0,(num_as`div`2) + (num_as`mod`2) - 1) 0 :: IO (IOUArray Int Word8)
+  phis <- newArray (0,(num_ps`div`2) + (num_ps`mod`2) - 1) 0 :: IO (IOUArray Int Word8)
+  
   let ps = (alphas,phis)
-  f_alpha <- get_alpha_selector
-  forM [0..num_as-1] $ \i -> do
-    randomRIO (0,num_buckets-1) >>= (set_param f_alpha ps i)
-  close_selector f_alpha
-  f_phi <- get_phi_selector
-  forM [0..num_ps-1] $ \i -> do
-    randomRIO (0,num_buckets-1) >>= (set_param f_phi ps i)
-  close_selector f_phi
+      
+  forM [0..(num_as`div`2) + (num_as`mod`2) - 1] $ \i -> do
+    randomIO >>= (writeArray alphas i)
+  forM [0..(num_ps`div`2) + (num_ps`mod`2) - 1] $ \i -> do
+    randomIO >>= (writeArray phis i)
   return (num_as,num_ps,ps)
   
 solveAlphaPhi :: Int -> Int -> FilePath -> FilePath -> Int -> IO ()
@@ -102,13 +100,17 @@ solveAlphaPhi num_as num_phis alphapath phipath num_its = do
     putStrLn $ "      alphas optimized"
     update_all_params alphapath params get_phi_selector
     putStrLn $ "      phis optimized"
+    
   f_alpha <- get_alpha_selector
-  a_res <- mapM (get_param f_alpha params) [0..num_as-1]
+  alphas <- fmap (map read . map head . map words . lines) $ readFile alphapath :: IO [Integer]
+  a_res <- forM alphas (\i -> fmap ((,)i) $ get_param f_alpha params i) :: IO [(Integer, Double)]
   close_selector f_alpha
+  writeFile "alpha_estimate" $ unlines $ map (\(a,b) -> (show a) ++ " " ++ (show b)) a_res
+  
   f_phi <- get_phi_selector
-  p_res <- mapM (get_param f_phi params) [0..num_as-1]
+  phis <- fmap (map read . map head . map words . lines) $ readFile phipath :: IO [Integer]
+  p_res <- forM phis (\i -> fmap ((,)i) $ get_param f_phi params i) :: IO [(Integer, Double)]
   close_selector f_phi
-  writeFile "alpha_estimate" $ unlines $ map show a_res
-  writeFile "phi_estimate" $ unlines $ map show  p_res
+  writeFile "phi_estimate" $ unlines $ map (\(a,b) -> (show a) ++ " " ++ (show b)) p_res
   
   
