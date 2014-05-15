@@ -1,5 +1,7 @@
 module SolveAlphaPhi where
 
+import System.Environment
+import System.Directory
 import SimulateAlphaPhi hiding (doit)
 import Data.Array.Unboxed hiding ((//))
 import Data.Array.IO
@@ -12,38 +14,55 @@ import Control.Monad
 import qualified Data.Map as Map
 import System.Random
 import Data.Word
-import Database.PureCDB
+import Database.CDB
 import Data.Binary
 import qualified Data.ByteString.Lazy as B
+import Control.Exception
 
-type ParamSelector = (Params -> IOUArray Int Word8, ReadCDB)
+import qualified Data.HashMap.Strict as HM
+
+instance Packable Integer where
+  pack i = B.toStrict $ encode i
+
+instance Unpackable Integer where
+  unpack i = decode $ B.fromStrict  i
+
+instance Packable Int where
+  pack i = B.toStrict $ encode i
+
+instance Unpackable Int where
+  unpack i = decode $ B.fromStrict  i
+
+
+type ParamSelector = (Params -> IOUArray Int Word8, HM.HashMap Integer Int)
 
 type Params = (IOUArray Int Word8, IOUArray Int Word8)
 
 get_alpha_selector = do
-  f <- openCDB "alpha.cbd"
+  f <- cdbInit "alpha.cdb"
   return (fst,f)
 get_phi_selector = do
-  f <- openCDB "phi.cbd"
+  f <- cdbInit "phi.cdb"
   return (snd,f)
-close_selector (_,f) = closeCDB f
+close_selector (_,f) = return () --closeCDB f
   
-num_buckets = 16
+num_buckets = 8
               
 get_param :: ParamSelector -> Params -> Integer -> IO Double
 get_param (f,db) ps s' = do
-  [s] <- fmap (map $ decode. B.fromStrict ) $ getBS db $ B.toStrict $ encode s'
-  bits <- readArray (f ps) (s`div`2)
-  let m_bits = if s`mod`2 == 0 then bits`mod`num_buckets else bits`div`num_buckets
-  return $ (fromIntegral m_bits) / (fromIntegral num_buckets-1)
+  let (Just s) = HM.lookup s' db
+  bits <- readArray (f ps) s
+  return $ (fromIntegral bits) / (fromIntegral num_buckets-1)
 
 set_param :: ParamSelector -> Params -> Integer -> Word8 -> IO ()
 set_param (f,db) ps i' b = do
-  [i] <- fmap (map $ decode . B.fromStrict) $ getBS db $ B.toStrict $ encode i'
-  let m_bits = if i`mod`2 == 0 then b else b * num_buckets
-  writeArray (f ps) i m_bits
+  let (Just i) = HM.lookup i' db
+  writeArray (f ps) i b
 
-modifyArray a i f = (readArray a i) >>= (writeArray a i . f)
+modifyArray a i f = do
+  x <- readArray a i 
+  fx <- evaluate $ f x
+  writeArray a i fx
 
 a//b = (fromIntegral a)/(fromIntegral b)
 
@@ -53,64 +72,67 @@ update_param targ nrts_ix potentials readParam writeParam = do
   forM nrts_ix $ \i -> do
     x <- readParam i
     forM [0..num_buckets-1] $ \b -> do
-      modifyArray potentials b (+(log $ 1 - x*(b//(num_buckets -1))))
+      modifyArray potentials b (+(x*(b//(num_buckets -1)))/(1 - x*(b//(num_buckets -1))))
   (b,_) <- fmap (minimumBy (compare `on` snd))
-           $ mapM (\b -> fmap ((,) b . abs . (targ - )) $ readArray potentials b) [1..num_buckets-1]
+           $ mapM (\b -> fmap (\x -> (b,abs $ x - targ)) $ readArray potentials b) [0..num_buckets-1]
   writeParam b
   
-update_all_params :: FilePath -> Params -> IO ParamSelector -> IO ()
-update_all_params path ps db = do
-  f <- db
-  datapoints <- fmap (map (map read) . map words . lines) $ readFile path
+update_all_params :: FilePath -> Params -> ParamSelector -> ParamSelector -> IO ()
+update_all_params path ps f g = do
+--  f <- db
+  datapoints <- fmap (map (map read) . map words . lines) $ readFiles path :: IO [[Integer]]
   potentials <- newArray (0,num_buckets-1) 0
-  forM_ datapoints $ \(ix:targ:nrts_ix) -> 
-    update_param (fromIntegral targ) nrts_ix potentials (get_param f ps) (set_param f ps ix)
-  close_selector f
+  forM_ datapoints $ \(ix:targ:nrts_ix) -> do
+    update_param (fromIntegral targ) nrts_ix potentials (get_param g ps) (set_param f ps ix)
+--  close_selector f
                                 
-randomInit :: FilePath -> FilePath -> IO (Int,Int,Params)
+randomInit :: FilePath -> FilePath -> IO (ParamSelector, ParamSelector,Int,Int,Params)
 randomInit alpha_file phi_file = do
-  num_as <- fmap length $ readFile alpha_file
-  num_ps <- fmap length $ readFile phi_file
-  
-  alphas <- fmap (map head . map words . lines) $ readFile alpha_file
-  flip makeCDB "alpha.cdb" $ do  
-    forM_ (zip [0:: Int ..] alphas) $ \(i,a) -> addBS (B.toStrict $ encode $ (read a :: Integer)) (B.toStrict $ encode i)
+  alphas <- fmap (map read . map head . map words . lines) $ readFiles alpha_file :: IO [Integer]
+  --cdbMake "alpha.cdb" $ cdbAddMany $ zip alphas [0:: Int ..] 
+  let f_alphas = HM.fromList $ zip alphas [0..]
     
-  phis <- fmap (head . map words . lines) $ readFile phi_file
-  flip makeCDB "phi.cdb" $ do
-    forM_ (zip [0:: Int ..] phis ) $ \(i,a) -> addBS (B.toStrict $ encode $ (read a :: Integer)) (B.toStrict $ encode i)
+  phis <- fmap (map read . map head . map words . lines) $ readFiles phi_file :: IO [Integer]
+  --cdbMake "phi.cdb" $ cdbAddMany $ zip phis [0:: Int ..]
+  let f_phis = HM.fromList $ zip phis [0..]
+  
+  let (num_as,num_ps) = (HM.size f_alphas,HM.size f_phis)
 
-  alphas <- newArray (0,(num_as`div`2) + (num_as`mod`2) - 1) 0 :: IO (IOUArray Int Word8)
-  phis <- newArray (0,(num_ps`div`2) + (num_ps`mod`2) - 1) 0 :: IO (IOUArray Int Word8)
+  alphas <- newArray (0,num_as -1) 0 :: IO (IOUArray Int Word8)
+  phis <- newArray (0,num_ps - 1) 0 :: IO (IOUArray Int Word8)
   
   let ps = (alphas,phis)
       
-  forM [0..(num_as`div`2) + (num_as`mod`2) - 1] $ \i -> do
-    randomIO >>= (writeArray alphas i)
-  forM [0..(num_ps`div`2) + (num_ps`mod`2) - 1] $ \i -> do
-    randomIO >>= (writeArray phis i)
-  return (num_as,num_ps,ps)
+  forM [0..(num_as - 1)] $ \i -> do
+    randomRIO (0,num_buckets-1) >>= (writeArray alphas i)
+  forM [0..(num_ps - 1)] $ \i -> do
+    randomRIO (0,num_buckets-1) >>= (writeArray phis i)
+  return ((fst,f_alphas), (snd,f_phis) ,num_as,num_ps,ps)
   
-solveAlphaPhi :: Int -> Int -> FilePath -> FilePath -> Int -> IO ()
-solveAlphaPhi num_as num_phis alphapath phipath num_its = do
-  (num_as,num_phis,params) <- randomInit alphapath phipath
-  forM [1..num_its] $ \i -> do
+solveAlphaPhi :: FilePath -> FilePath -> String -> Int -> IO ()
+solveAlphaPhi alphapath phipath out_suffix num_its = do
+  (f_alpha,f_phi,num_as,num_phis,params) <- randomInit alphapath phipath
+  forM_ [1..num_its] $ \i -> do
     putStrLn $ "   iteration = " ++ (show i)
-    update_all_params alphapath params get_alpha_selector
+    update_all_params alphapath params f_alpha f_phi
     putStrLn $ "      alphas optimized"
-    update_all_params alphapath params get_phi_selector
+    update_all_params phipath params f_phi f_alpha
     putStrLn $ "      phis optimized"
     
-  f_alpha <- get_alpha_selector
-  alphas <- fmap (map read . map head . map words . lines) $ readFile alphapath :: IO [Integer]
-  a_res <- forM alphas (\i -> fmap ((,)i) $ get_param f_alpha params i) :: IO [(Integer, Double)]
-  close_selector f_alpha
-  writeFile "alpha_estimate" $ unlines $ map (\(a,b) -> (show a) ++ " " ++ (show b)) a_res
+    alphas <- fmap (map read . map head . map words . lines) $ readFiles alphapath :: IO [Integer]
+    a_res <- forM alphas (\i -> fmap ((,)i) $ get_param f_alpha params i) :: IO [(Integer, Double)]
+    writeFile ("alpha_estimate" ++ out_suffix ++ "_" ++  (show i)) $ unlines $ map (\(a,b) -> (show a) ++ " " ++ (show b)) a_res
   
-  f_phi <- get_phi_selector
-  phis <- fmap (map read . map head . map words . lines) $ readFile phipath :: IO [Integer]
-  p_res <- forM phis (\i -> fmap ((,)i) $ get_param f_phi params i) :: IO [(Integer, Double)]
-  close_selector f_phi
-  writeFile "phi_estimate" $ unlines $ map (\(a,b) -> (show a) ++ " " ++ (show b)) p_res
-  
-  
+    phis <- fmap (map read . map head . map words . lines) $ readFiles phipath :: IO [Integer]
+    p_res <- forM phis (\i -> fmap ((,)i) $ get_param f_phi params i) :: IO [(Integer, Double)]
+    writeFile ("phi_estimate" ++ out_suffix ++ "_" ++ (show i)) $ unlines $ map (\(a,b) -> (show a) ++ " " ++ (show b)) p_res
+
+readFiles path = fmap concat $ do
+  fs <- getDirectoryContents path
+  forM (filter ((=="part-") . take 5) fs) $ \s -> readFile $ path ++ "/" ++ s
+    
+doit = solveAlphaPhi "alphafile" "phifile" "" 8
+
+main = do
+  [afile,pfile] <- getArgs
+  solveAlphaPi afile pfile 8
