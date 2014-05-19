@@ -14,3 +14,18 @@ def wait_until(pred, timeout, period=30):
         if pred(): return True
         print "Checked: ", time.time()
         time.sleep(period)
+
+def read_mrjobs_args(args):
+    mrjobsjar = unicode(args[2])
+    outdir = unicode(args[3])
+    nummappers = unicode(args[4])
+    numreducers = unicode(args[5])
+    numtopics = unicode(args[6])
+    stopwords = unicode(args[7])
+    tempdir = unicode(args[8])
+    s3distcpjar = unicode(args[9])
+    return (mrjobsjar, outdir, nummappers, numreducers, numtopics, stopwords, tempdir, s3distcpjar)
+
+master = "m1.large"
+slave = "m3.2xlarge"
+num_instances = 4

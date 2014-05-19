@@ -12,13 +12,11 @@ if __name__ == "__main__":
         step1 = boto.emr.step.InstallHiveStep()
         step2 = boto.emr.step.HiveStep("Run lda postprocess hive", s3_query_file_uri, hive_args=postprocess_args)
         steps = [step1, step2]
-        master_instance_type = "m3.xlarge"
-        slave_instance_type = "m3.xlarge"
         jobid = conn.run_jobflow("Hive step, bro", log_uri=log_uri,
                                            steps=steps,
-                                           master_instance_type=master_instance_type,
-                                           slave_instance_type=slave_instance_type,
-                                           num_instances=6,
+                                           master_instance_type=master, ##see utils
+                                           slave_instance_type=slave,
+                                           num_instances=num_instances,
                                            enable_debugging=True,
                                            ami_version="latest",
                                            hadoop_version="2.2.0")

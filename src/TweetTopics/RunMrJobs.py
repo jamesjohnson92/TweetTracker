@@ -53,13 +53,10 @@ if __name__ == "__main__":
                            step_args=args[i],
                            )
             steps.append(step)
-        master_instance_type = "m3.xlarge"
-        slave_instance_type = "m3.xlarge"
-        num_instances = 6
         jobid = conn.run_jobflow("Mr. LDA Doing TweetTopics and Hungering for the Souls of the Living", log_uri=log_uri,
                                            steps=steps,
-                                           master_instance_type=master_instance_type,
-                                           slave_instance_type=slave_instance_type,
+                                           master_instance_type=master, #see utils
+                                           slave_instance_type=slave,
                                            num_instances=num_instances,
                                            enable_debugging=True,
                                            ami_version="latest",

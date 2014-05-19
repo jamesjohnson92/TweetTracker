@@ -14,3 +14,7 @@ def wait_until(pred, timeout, period=30):
         if pred(): return True
         print "Checked: ", time.time()
         time.sleep(period)
+
+master = "m1.large"
+slave = "m3.2xlarge"
+num_instances = 18

@@ -1,9 +1,9 @@
 from mrjob.job import MRJob
 from mrjob.protocol import RawValueProtocol
-import json as simplejson
 from stemming.porter2 import stem
 import enchant
 import string
+import ujson
 
 USERID_PREFIX = 'id:twitter.com:'
 
@@ -21,7 +21,7 @@ class GenerateCorpus(MRJob):
         if w1[0] == w1[0]:
             return self.small_edit_distance(w1[1:],w2[1:],ed_max)
         else:
-            return self.small_edit_distance(w1[1:],w2,ed_max-1) or self.small_edit_distance(w1,w2[1:],ed_max-1) or self.small_edit_distance(w1[1:],w2[1:],ed_max-1) 
+            return self.small_edit_distance(w1[1:],w2,ed_max-1) or self.small_edit_distance(w1,w2[1:],ed_max-1) or self.small_edit_distance(w1[1:],w2[1:],ed_max-1)
 
     def prepare_word(self,word):
         if word.startswith('@'):
@@ -38,7 +38,7 @@ class GenerateCorpus(MRJob):
 
         if len(word) == 0:
             return False
-        
+
         if self.dict.check(word):
             return stem(word)
 
@@ -49,12 +49,15 @@ class GenerateCorpus(MRJob):
 #                return stem(new_word)
         return False
 
-    
+
     def mapper_init(self):
         self.dict = enchant.Dict("en_US")
 
     def mapper(self, _, line):
-        tweet = simplejson.loads(line)
+        try:
+            tweet = ujson.loads(line)
+        except:
+            tweet = {} #so skip this one
         if 'twitter_lang' in tweet and tweet['twitter_lang'] == 'en' and 'actor' in tweet :
             user = tweet['actor']['id'][len(USERID_PREFIX) :]
             the_tweet = tweet['body'].split()
@@ -64,7 +67,7 @@ class GenerateCorpus(MRJob):
                 if word:
                     result.append(word)
             yield int(user), ' '.join(result)
-            if 'retweetCount' in tweet and int(tweet['retweetCount']) > 0:
+            if 'object' in tweet and 'actor' in tweet['object'] and 'id' in tweet['object']['actor'] and 'retweetCount' in tweet and int(tweet['retweetCount']) > 0:
                 tweeter = tweet['object']['actor']['id'][len(USERID_PREFIX) :]
                 yield int(tweeter), ' '.join(result)
 
