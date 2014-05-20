@@ -11,18 +11,6 @@ class GenerateCorpus(MRJob):
 
     OUTPUT_PROTOCOL = RawValueProtocol
 
-    def small_edit_distance(self,w1,w2,ed_max):
-        if ed_max < 0:
-            return False
-        if w1 == "":
-            return len(w2) <= ed_max
-        if w2 == "":
-            return len(w1) <= ed_max
-        if w1[0] == w1[0]:
-            return self.small_edit_distance(w1[1:],w2[1:],ed_max)
-        else:
-            return self.small_edit_distance(w1[1:],w2,ed_max-1) or self.small_edit_distance(w1,w2[1:],ed_max-1) or self.small_edit_distance(w1[1:],w2[1:],ed_max-1)
-
     def prepare_word(self,word):
         if word.startswith('@'):
             return False
@@ -41,14 +29,7 @@ class GenerateCorpus(MRJob):
 
         if self.dict.check(word):
             return stem(word)
-
-#        suggestions = self.dict.suggest(word)
-#        if len(suggestions) > 0:
-#            new_word = suggestions[0].lower()
-#            if self.small_edit_distance(new_word,word,2):
-#                return stem(new_word)
         return False
-
 
     def mapper_init(self):
         self.dict = enchant.Dict("en_US")
