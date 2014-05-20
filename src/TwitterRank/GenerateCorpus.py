@@ -42,11 +42,11 @@ class GenerateCorpus(MRJob):
         if self.dict.check(word):
             return stem(word)
 
-        suggestions = self.dict.suggest(word)
-        if len(suggestions) > 0:
-            new_word = suggestions[0].lower()
-            if self.small_edit_distance(new_word,word,2):
-                return stem(new_word)
+#        suggestions = self.dict.suggest(word)
+#        if len(suggestions) > 0:
+#            new_word = suggestions[0].lower()
+#            if self.small_edit_distance(new_word,word,2):
+#                return stem(new_word)
         return False
 
     
