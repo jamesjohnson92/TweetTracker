@@ -1,0 +1,24 @@
+\subsection*{A problem with Alpha Phi}
+
+The problem with Alpha Phi is that we don't know the actual twitter graph, merely the retweet graph.
+This means that the answers will be biased in all sorts of weird ways.
+To fix this problem, we must approximate
+\[\Prob{u\to u'|R_{u,u'}\ge r}\]
+where $u$ and $u'$ are users, the binary random variable $u\to u'$ is does $u$ follow $u'$, and $R_{u,u'}$ is the number of times $u$ has retweeted $u'$.
+In the old model, we declared 
+\[\Prob{u\to u'|R_{u,u'}\ge r} = 1_{r>0}\]
+This has problems, for instance, if $u'$ once had a great tweet that had many retweets, but $u'$ has very few friends.
+Later tweets will be punished unfairly in this model
+
+We write a naive Bayes estimate
+\[\Prob{u\to u'|R_{u,u'}\ge r} = \frac{\Prob{u\to u'}\Prob{R_{u,u'}\ge r|u\to u'}}{\Prob{R_{u,u'}\ge r}}\]
+The prior, $\Prob{u\to u'}$ is simply the number of followers of $u'$ divided by $N$, the number of twitterers.
+The normalizer can be estimated from the data, we make a histogram.  
+Finally, we assert $R_{u,u'}|u\to u'\sim \mbox{Poison}(\lambda)$.
+
+Quick sanity check: what if $r=0$.  Then the normalizer is 1 and the prior is tiny, so the weight is effectively zero.
+Why would this ever get big?  Because we expect $\Prob{R_{u,u'}\ge 1}$ to be quite small, and $\Prob{R_{u,u'}\ge 5}$ to be nearly zero, so the posterior will be large.  
+
+The parameter $\lambda$ is a sort of regularizer.  If $\lambda=0$, then the likelihood is always one.  This might actually cause problems, for if $r$ is sufficiently , the probability becomes $O(N)>0$, since the prior is $O(1/N)$ and the normalizer is $O(1/N^2)$, so we make sure not to set $\lambda$ too low (this is an easily computable lower bound). 
+On the other extreme, if $\lambda=\infty$, nobody ever follows anybody else.  
+How to choose $\lambda$?  Probably doesn't matter too much, so long as its above that minimum.
