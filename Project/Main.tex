@@ -1,0 +1,54 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{amsthm}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{caption}
+\usepackage{subcaption}
+%%\usepackage[small,nohug,heads=LaTeX]{diagrams}
+%%\diagramstyle[labelstyle=\scriptstyle]
+\usepackage[pdftex]{graphicx}
+\usepackage{fullpage}
+\usepackage{hyperref}
+\usepackage{subfiles}
+\usepackage{appendix}
+\usepackage{txfonts}
+\usepackage{xcolor}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+
+\newcommand{\Prob}[1]{\mathbb{P} \left[#1\right]}
+
+\renewcommand*\thesection{\arabic{section}}
+\hypersetup{colorlinks=true,linkbordercolor=white,linkcolor=blue,pdfborderstyle={/S/U/W 1}}
+
+\title{Tracking Tweets and their Retweets through Twitter}
+\author{Howon Lee, Dilli Paudel, Joseph Victor}
+
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\newpage 
+\subfile{Intro.tex} 
+\subfile{TwitterRank.tex} 
+\subfile{AlphaPhi.tex} 
+\subfile{Model.tex}
+\subfile{Results.tex}
+
+%\appendix
+%\appendixpage
+%\addappheadtotoc
+
+\newpage
+\bibliographystyle{alpha}
+\bibliography{myrefs}
+
+
+\end{document}

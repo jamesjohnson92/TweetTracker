@@ -1,0 +1,37 @@
+\section{Introduction}
+
+When does a tweet get popular?  
+When do its retweets echo far throughout the twittersphere, and when does  it fall completely flat?
+Can you predict a winner seconds after its creation? How about minutes?
+How about before it was created at all?
+In this project, we investigate this problem.
+In particular: given a minute of information about a tweet and information about the poster, can you predict the number of retweets it gets after an hour?
+
+To this end, we intend to build interesting and useful features for these predictions, and use standard learning algorithms.  
+
+\subsection{Our Features}
+
+We propose two novel measures of Twitter retweetability, and use these to build features to learn on.
+The first is a \texttt{GraphRank} based algorithm called \texttt{RetweetRank}, based on work by  \cite{Weng:2010:TFT:1718487.1718520}.  
+For each user, we compute a retweetability rank, with the standard assumption that a user has a high propensity for being retweeted if they are retweeted by users with a high propensity to be retweeted.  
+
+The second measure comes from assuming a generative process through which tweets propagate through the network.
+Each tweet has a quality and each user has some probability of retweeting a perfect tweet of a given topic.
+We learn these on a body of work, and when a new tweet comes along we can learn its quality after observing it for a short period of time.  The idea: if you've been retweeted by someone who seldom retweets, this is a better indicator of your eventual success than if you're retweeted by someone who retweets very often.   
+
+\subsubsection{Use of Topics}
+
+In each of these measures, we use the content to separate users and tweets into topics.
+People don't retweet everything uniformly: a great tweet about sports is unlikely to get much attention from someone who isn't a sports fan.
+By allowing tweets to get popular for different reasons, we greatly increase the richness of the space of models.
+Tweets can get recognized for propagating through subgraphs where the strength of a specific topic is strong, rather than punishing tweets who do not appeal to everybody or users that do not enjoy a wide variety of tweets.  
+
+
+\subsection{Our Data}
+
+For this task, we have been given a 10\% sample of the Twitter Firehose for the month of March, 2013.  
+This data, from the Twitter API, is one JSON object per tweet or retweet.
+It includes the tweet itself, the number of retweets and favorites at the time of the tweet (tweets have zero retweets upon first posting, of course) or retweet, information about the user (number of followers, number of friends, number of posts).  
+For retweets, we have information about the original poster as well as about the retweeter.  
+It is important to note that we have not been given the list of followers for a user, merely the number of followers.
+

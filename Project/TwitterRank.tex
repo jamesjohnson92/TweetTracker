@@ -1,0 +1,70 @@
+\section{\texttt{TwitterRank} and \texttt{RetweetRank}}
+
+\subsection{Overview The \texttt{TwitterRank} Algorithm}
+
+Our first high powered feature is a modified \texttt{TwitterRank}, as in \cite{Weng:2010:TFT:1718487.1718520}.
+The original \texttt{TwitterRank} works as follows.  
+First use LDA\footnote{We used the package \texttt{Mr.LDA} to compute LDA through Variational Inference on Map Reduce \cite{conf/www/ZhaiBAA12}.} to compute topic scores between each pair of users $u$ and $u'$ and each topic $t$, denoted $\mbox{sim}_t(u,u')$.
+Then, for each topic $t$, form the weighted graph where each node is a user there is a directed edge between $u$ and $u'$ if $u$ follows $u'$.
+The graph weights, $w^{TR}_t$, are given by
+\begin{equation}\label{eq:treq}
+w^{TR}_t(u,u') = \frac{T_{u'}}{\sum_{a:u\to a}T_{a}}\cdot \mbox{sim}_t(u,u')
+\end{equation}
+where $T_{a}$ is the number of tweets posted by user $a$ and $u\to a$ is the binary variable indicating $u$ follows $a$.  
+For each $t$, we run weighted \texttt{GraphRank}, where with teleportation probabilities given by normalized topic strength of topic $t$, $\gamma_{u,t}$.   
+The resulting rank is the $t$-specific \texttt{TwitterRank}, denoted $TR_{u,t}$.  
+
+\begin{algorithm}
+  \caption{Topic Specific TwitterRank}
+  \label{alg:tralg}
+
+  \begin{algorithmic}
+    \State Use LDA to compute $\gamma_{u,t}$ and $\mbox{sim}_t(u,u')$ for each topic $t$ and user pair $u,u'$.  
+    \For {$t\in$ Topics}
+    \State Initialize $TR_{u,t}$ to 1 for each user $u$.
+    \While {Not converged}
+    \For {$u\in$ Users}
+    \State $TR_{u,t}\gets \gamma_{u,t}(1-\beta) + \beta w^{TR}_t(u',u)\cdot TR_{u',t}$
+    \EndFor
+    \EndWhile
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}
+
+
+Intuitively, the edge weight $w_t(u,u')$ is what fraction of $u$'s twitter feed $u'$ takes up times their topic similarity.
+That is, user $u$, when randomly viewing his twitter feed, will randomly pick someone, but weighted such that they will topic pick a user who's topic interests them.  
+Considering this as a random surfer is then slightly far-fetched, since the user does not then get to see his friend's feed, but we do it anyway.  
+The idea is that users with more influence in a specific topic will dominate the feeds of users with high influence in that same topic, and this captures that notion exactly.
+
+\subsection{The \texttt{RetweetRank} Algorithm}
+
+The \texttt{RetweetRank} gives a high powered feature of the user which measures their influence in terms of accumulating retweets.  
+The idea, if you are retweeted by someone who's tweets have a high retweet rank, then you ought to have a powerful propensity for making your tweets visible as well.
+In the fable of the random surfer, the tweet itself can be though of as surfing.  
+
+We modify this algorithm for our purposes in two slightly different ways.
+First, we consider a slightly different graph; the retweet graph, where each user is a node and there is an edge between $u$ and $u'$ if $u$ has ever retweeted $u'$.
+This is both stronger and weaker than the follower graph; since one user can follow another without ever retweeting them, and one user can retweet another without following them.
+The latter happens in practice quite often, as a ``retweet of a retweet'' is indistinguishable from a single retweet.
+If $u$ retweets $v$ and $w$ sees $u$'s retweet and retweets it, it is only recorded that $w$ retweeted $v$, and this can and does happen even if $w$ is not following $v$ at all!
+
+Second, we modify the edge weights as follows.
+\begin{equation}\label{eq:rreq}
+w^{RR}_t(u,u') = \frac{R_{u,u'}T_{u'}}{\sum_a R_{u,a}T_{a}}\cdot \mbox{sim}_t(u,u')
+\end{equation}
+where $R_{u,u'}$ is the number of times $u$ has retweeted $u'$ and where the sum over $a$ is over all users.  
+
+To compute the \texttt{RetweetRank}, $RR_{u,t}$, use Algorithm~\ref{alg:tralg} with equation~\eqref{eq:treq} replaced with equation~\eqref{eq:rreq} in the update step, with the sum now over all users who have retweeted $u$, not just followers.  
+
+\subsection{Tweet Features from Retweet Rank}
+
+Given a brand new tweet $s$ from user $u$, the $RR_u^t$ give a strong and immidiate first guess at the eventual popularity of the tweet.  If, further, we wait until time $p$ after a tweet is posted, we can compute tweet features
+\[RR_{s,t}^{(p)} = \sum_{u\in\mathcal{R}_s^{(p)}}RR_{u,t}\]
+where $\mathcal{R}_s^{(p)}$ is the set of users who have retweeted $s$ within a time $p$ after $s$ was posted.  
+We compute these for a few values of $p$.
+Finally, if we wish to remove features we can compute overall \texttt{RetweetRank},
+\[RR_{u} =\sum_t RR_{u,t}\]
+\[RR_{s}^{(p)} \sum_t RR_{s,t}^{(p)}\]
+Note that it was still useful to have topics when computing the ranks originally, as this allows for a much richer space of models, even if we only ever use the aggregate over topics.    
+

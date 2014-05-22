@@ -23,7 +23,9 @@
 # Latex intermidiates
 *.log
 *.aux
-
+*.toc
+*.bbl
+*.blg
 
 # Python stuff
 *.pyc
