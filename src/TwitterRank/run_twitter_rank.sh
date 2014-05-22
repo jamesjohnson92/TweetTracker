@@ -1,6 +1,6 @@
 #!/bin/sh
 
-indir='s3n://tweettrack/Twitter_Firehose/';
+indir='s3n://tweettrack/Twitter_Firehose_Subset/';
 outdir='s3n://tweettrack/Twitterrank_Full_Output/';
 outdirnoslash='s3://tweettrack/Twitterrank_Full_Output';
 temphdfsdir='hdfs:///tweettracktemp/';
@@ -12,9 +12,9 @@ mrldajar='s3n://mrldajarbucket/Mr.LDA-0.0.1.jar';
 s3distcpjar='/home/hadoop/lib/emr-s3distcp-1.0.jar' #cluster itself's home
 stopwords='s3n://mrldajarbucket/stopwords';
 
-python GenerateCorpus.py -c mrjob.conf -r emr $indir --output-dir $outdir/corpus --no-output;
+#python GenerateCorpus.py -c mrjob.conf -r emr $indir --output-dir $outdir/corpus --no-output --jobconf mapred.skip.map.max.skip.records=100;
 #python RunMrJobsParse.py emr $mrldajar $outdir $nummappers $numreducers $numtopics $stopwords $temphdfsdir $s3distcpjar;
-#python RunMrJobsVarInf.py emr $mrldajar $outdir $nummappers $numreducers $numtopics $stopwords $temphdfsdir $s3distcpjar;
+python RunMrJobsVarInf.py emr $mrldajar $outdir $nummappers $numreducers $numtopics $stopwords $temphdfsdir $s3distcpjar;
 #python RunMrJobsDispDoc.py emr $mrldajar $outdir $nummappers $numreducers $numtopics $stopwords $temphdfsdir $s3distcpjar;
 #python FollowersTable.py  $setnums -r emr $indir --output-dir $outdir/followertable ###create the ldapostprocess now
 #python RunHive.py emr $outdir;
