@@ -14,7 +14,7 @@ stopwords='s3n://mrldajarbucket/stopwords';
 
 #python GenerateCorpus.py -c mrjob.conf -r emr $indir --output-dir $outdir/corpus --no-output --jobconf mapred.skip.map.max.skip.records=100;
 #python RunMrJobsParse.py emr $mrldajar $outdir $nummappers $numreducers $numtopics $stopwords $temphdfsdir $s3distcpjar;
-python RunMrJobsVarInf.py emr $mrldajar $outdir $nummappers $numreducers $numtopics $stopwords $temphdfsdir $s3distcpjar;
+#python RunMrJobsVarInf.py emr $mrldajar $outdir $nummappers $numreducers $numtopics $stopwords $temphdfsdir $s3distcpjar;
 #python RunMrJobsDispDoc.py emr $mrldajar $outdir $nummappers $numreducers $numtopics $stopwords $temphdfsdir $s3distcpjar;
 #python FollowersTable.py  $setnums -r emr $indir --output-dir $outdir/followertable ###create the ldapostprocess now
 #python RunHive.py emr $outdir;
