@@ -31,27 +31,25 @@ on tweettopics.tweet = tweettable.tweet_id
 where topic = '${hiveconf:TOPIC}';
 
 create external table twittergraph
-       (friend bigint, follower bigint)
+       (friend bigint, follower bigint, edgeprob double)
 ROW FORMAT DELIMITED FIELDS TERMINATED BY ' ' LINES TERMINATED BY '\n'
 STORED AS TEXTFILE
-location '${hiveconf:APPATH}/twittergraph${hiveconf:TOPIC}';
-
-insert into table twittergraph
-select distinct creator, tweeter
-from tweettable;
-
+location '${hiveconf:APPATH}/twittergraph';
 
 create external table alphaphiin
-       (tweet_id bigint, tweeter bigint, retweeted bigint)
+       (tweet_id bigint, tweeter bigint, retweeted bigint, seenprob double)
 ROW FORMAT DELIMITED FIELDS TERMINATED BY ' ' LINES TERMINATED BY '\n'
 STORED AS TEXTFILE
 location '${hiveconf:APPATH}/alphaphiin${hiveconf:TOPIC}';
 
 insert into table alphaphiin
-select tweettable.tweet_id, twittergraph.follower, max(twittergraph.follower = tweettable.tweeter)
-from twittergraph join tweettable
-on twittergraph.friend = tweettable.tweeter
-where tweettable.creator <> twittergraph.follower
-group by tweettable.tweet_id, tweettable.creator, twittergraph.follower;
+select topictweettable.tweet_id, 
+       twittergraph.follower, 
+       max(twittergraph.follower = topictweettable.tweeter),
+       1 - exp(sum(log(1-twittergraph.edgeprob)))
+from twittergraph join topictweettable
+on twittergraph.friend = topictweettable.tweeter
+where topictweettable.creator <> twittergraph.follower
+group by topictweettable.tweet_id, topictweettable.creator, twittergraph.follower;
 
 

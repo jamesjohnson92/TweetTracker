@@ -84,16 +84,26 @@ We know the prior exactly:
 \[\Prob{u\to u'}=\frac{F_{u'}}{N}\]
 where $N$ is the size of the Twitterati and $F_{u'}$ is the number of followers of user $u'$.
 We can estimate $\Prob{R_{u,u'} \ge r}$ directly from the data by building histograms:
-\[\Prob{R_{u,u'} \ge r}=\frac{\#\{a : R_{a,u'}>r\}}{N}\]
+\[\Prob{R_{u,u'} \ge r}=\frac{\#\{a : R_{a,u'}\ge r\}}{N-1}\]
 The hard part is estimating the likelihood.  For this we make additional, very strong, known-to-be-incorrect assumptions.
 We assume that the retweets of a user $u'$ are distributed uniformly among their $F_{u'}$ followers.  
-Thus $R_{u,u'}|(u\to u')$ is distributed as binomial with probability $1/F_{u'}$ and $\sum_a R_{a,u'}$ trials.  
+Thus $R_{u,u'}|(u\to u')$ is distributed as binomial with probability $1/F_{u'}$ and $R_u':=\sum_a R_{a,u'}$ trials.  
 Even if this assumption were true, it will lead to low-biased estimates of the posterior probability, since some retweets are made by non-followers, and since the assumption is wrong, for the users that don't have most of the retweets, the estimates will be low-biased.
 This is actually a good thing: at the very least we won't dramatically overestimate the number of edges while still counting the most adamant followers.  
 
-As a sanity check, if $R_{u,u'}=0$, this should be approximately zero.
+We get
+\begin{eqnarray}
+  \Prob{u\to u'~|~R_{u,u'}\ge r} &=& \frac{\Prob{u\to u'}\Prob{R_{u,u'}\ge r~|~u\to u'}}{\Prob{R_{u,u'}\ge r}}\nonumber\\
+  &=& \pfrac{F_{u'}}{N}\pfrac{N-1}{\#\{a : R_{a,u'}\ge r\}}\Prob{\mbox{Binomial}(1/F_{u'},R_{u'}) \ge r}\nonumber\\
+  &\approx& \pfrac{F_{u'}}{\#\{a : R_{a,u'}\ge r\}}\Prob{\mathcal{N}\left(\frac{R_{u'}}{F_{u'}},\frac{\mbox{Binomial}(1/F_{u'},R_{u'})\ge r}\label{eq:edgeprob}
+\end{eqnarray}
+
+As a sanity check, if $r=0$, this should be approximately zero.
 Indeed it is, as the prior is always approximately zero and normalizer will be approximately 1, thus making the posterior probability extremely small regardless of the likelihood.  
 For this reason, if $R_{u,u'}=0$, we set this probability to zero.
+
+Further sanity checking, if $r=1$, for users with few retweets and a reasonable number of followers (average, non celebrity users), this will be high (possibly greater than 1, so we need to clamp!), which is good since we don't expect many retweets from non-followers, so even one retweet means you probably follow that person.  
+If $F_{u'}=1$ and only one person retweets, that one person is a follower with probability 1, since the variance in the binomial is zero!  Similar statements remain true if the number of re-tweeters is approximately the number of followers, so for average users this approximation is probably reasonable.  
 
 Now, for any user $u$ and tweet $s$, we have
 \begin{eqnarray}

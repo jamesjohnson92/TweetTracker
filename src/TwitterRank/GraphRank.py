@@ -22,6 +22,8 @@ from mrjob.step import MRStep
 from mrjob.job import MRJob
 import mrjob
 
+
+
 class MRPageRank(MRJob):
 
     INPUT_PROTOCOL = JSONProtocol  # read the same format we write
