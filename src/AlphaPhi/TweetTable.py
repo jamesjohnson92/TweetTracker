@@ -19,7 +19,7 @@ class TweetTable(MRJob):
         if 'twitter_lang' in tweet :
             language = tweet['twitter_lang']
 
-        if language = 'en' and 'id' in tweet:
+        if language == 'en' and 'id' in tweet:
             user = tweet['actor']['id'][len(USERID_PREFIX) :]
             num_followers = 0
             tweetid = tweet['id'][len('tag:search.twitter.com,2005:') : ]
@@ -27,7 +27,7 @@ class TweetTable(MRJob):
                 tweetid = tweet['object']['id'][len('object:search.twitter.com,2005:') :]
                 if 'followersCount' in tweet['object']['actor']:
                     num_followers = tweet['object']['actor']['followersCount']
-            else if 'followersCount' in tweet['actor']:
+            elif 'followersCount' in tweet['actor']:
                 num_followers = tweet['actor']['followersCount']
             tweeter = user
             tweetid = tweet['id'][len('tag:search.twitter.com,2005:') : ]
