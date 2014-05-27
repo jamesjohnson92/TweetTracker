@@ -7,28 +7,50 @@ class GenerateTweetCorpus(MRJob):
 
     OUTPUT_PROTOCOL = RawValueProtocol
 
-    def mapper(self, _, line):
-        tweet = simplejson.loads(line)
-        if 'twitter_lang' in tweet and tweet['twitter_lang'] == 'en':
-            tweet_id = tweet['id'][len(TWEETID_PREFIX) :]
+    def prepare_word(self,word):
+        if word.startswith('@'):
+            return False
+        if word.startswith('#'):
+            res = self.prepare_word(word[1:])
+            if res:
+                return ' '.join([res,res])
 
-            the_tweet = tweet['body'].split(' ')
+        if len(word) == 0:
+            return False
+
+        word = word.encode('ascii','ignore').translate(None,string.punctuation).lower()
+
+        if len(word) == 0:
+            return False
+
+        if self.dict.check(word):
+            return stem(word)
+        return False
+
+    def mapper_init(self):
+        self.dict = enchant.Dict("en_US")
+
+    def mapper(self, _, line):
+        try:
+            tweet = ujson.loads(line)
+        except:
+            tweet = {} #so skip this one
+        if 'twitter_lang' in tweet and tweet['twitter_lang'] == 'en' and 'actor' in tweet :
+            tweetid = tweet['id'][len('tag:search.twitter.com,2005:') : ]
+            the_tweet = tweet['body'].split()
             result = []
             for i in xrange(len(the_tweet)):
-                if not the_tweet[i].startswith('@') && the_tweet[i] != 'RT' && not the_tweet[i].startswith('#'):
-                    result.append(the_tweet[i].lower())
-                if the_tweet[i].startswith('#'):
-                    result.append(the_tweet[i][1:].lower())
-                    result.append(the_tweet[i][1:].lower())
+                word = self.prepare_word(the_tweet[i])
+                if word:
+                    result.append(word)
+            if 'object' in tweet and 'actor' in tweet['object'] and 'id' in tweet['object']['actor'] and 'retweetCount' in tweet and int(tweet['retweetCount']) > 0:
+                tweetid = tweet['object']['id'][len('tag:search.twitter.com,2005:') : ]
+            yield int(tweetid), ' '.join(result)
 
-            if 'retweetCount' in tweet and int(tweet['retweetCount']) > 0:
-                tweet_id = tweet['object']['id'][len(TWEETID_PREFIX) :]
-            yield int(tweet_id), ' '.join(the_tweet)
-
-    def reducer(self, key, vals):
-        for v in vals:
-            yield None, "%d %s" % (key, v)
-            return #uniqueification
+    def reducer(self, tweetid, tweets):
+        for t in tweets:
+            yield None, "%s\t%s" % (user,t)
+            return
 
 if __name__ == '__main__':
     GenerateTweetCorpus.run()

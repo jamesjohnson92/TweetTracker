@@ -4,7 +4,7 @@ from mrjob.job import MRJob
 
 USERID_PREFIX = 'id:twitter.com:'
 
-MIN_OBSERVED_TWEETS = 5 # only use E[num_retweets] >= 50, makes computing easier.  
+MIN_OBSERVED_TWEETS = 1 # only use E[num_retweets] >= 50, makes computing easier.  
 
 class TweetTable(MRJob):
 
