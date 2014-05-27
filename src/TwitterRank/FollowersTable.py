@@ -21,9 +21,14 @@ class MRFollowers(MRJob):
 
         if language == 'en' and retweetCount > 0:
                 tweeter = tweet['object']['actor']['id'][len(USERID_PREFIX) :]
-                tweeterStatusesCount = tweet['object']['actor']['statusesCount'] # TODO: localize this by sampling it? how often have you tweeted RECENTLY?
+                tweeterStatusesCount = tweet['object']['actor']['statusesCount']
                 user = tweet['actor']['id'][len(USERID_PREFIX) :]
-                yield None, ('%d %d %d ' % (int(user), int(tweeter) , int(tweeterStatusesCount))) # the space at the end is important!!!! #blackmagic
+                yield (int(user), int(tweeter)) , int(tweeterStatusesCount)
+
+    def reducer(self, key, value):
+        user = key[0]
+        tweeter = key[1]
+        yield None, ('%d %d %d ' % (user, tweeter, sum(tweeterStatusesCount))) # the space at the end is important!!!! #blackmagic
 
 
 if __name__ == '__main__':
