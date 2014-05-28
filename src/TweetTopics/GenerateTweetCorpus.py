@@ -1,4 +1,5 @@
 from mrjob.job import MRJob
+from mrjob.protocol import RawValueProtocol
 import json as simplejson
 
 TWEETID_PREFIX = 'tag:search.twitter.com,2005:'
