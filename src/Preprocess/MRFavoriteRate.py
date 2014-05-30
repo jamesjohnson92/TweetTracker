@@ -20,24 +20,17 @@ class MRFavoritesRate(MRJob):
 						creationTime = datetime.strptime(tweet['object']['postedTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
 						favoritesCount = tweet['object']['favoritesCount']
 
-					if creationTime >= startTime :
-						timeDelta = retweetTime - creationTime
-						yield tweetid, (int((timeDelta.days * 86400 + timeDelta.seconds)/300), favoritesCount)
+					if (creationTime - startTime).total_seconds() > 0 :
+						timeDelta = (retweetTime - startTime).total_seconds() - (creationTime - startTime).total_seconds()
+						if timeDelta < 300 :
+							yield tweetid, (int(timeDelta/30), favoritesCount)
 				
 	def reducer_compute_rate(self, tweetid, favoritesCount):
-		timeIndexes = []
-		favStart = -1
+		rates = [0 for i in range(10)]
 		for t, c in favoritesCount :
-			if int(c) > favStart :
-				timeIndexes.append(int(t))
-				favStart = int(c)
+			rates[t] = c
 
-		maxTimeIndex = max(timeIndexes)
-		rates = [0 for i in xrange(maxTimeIndex + 1)]
-		for t in timeIndexes :
-			rates[t] = rates[t] + 1
-
-		yield str(tweetid), '%s ' % ' '.join(map(str, rates))
+		yield None, ('%s' % tweetid + ' ' + ' '.join(map(str, rates)))
 		# the space at the end is important!!!! #blackmagic		
 
 	def steps(self):

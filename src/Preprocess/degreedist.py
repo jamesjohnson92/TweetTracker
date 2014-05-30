@@ -2,33 +2,24 @@
 import sys
 import simplejson
 
-f = open('tweets.txt', 'r')
+f = open('followers', 'r')
 
 followers = {}
 for line in f :
-	tweet = simplejson.loads(line)
-	language = 'es'
-	retweetCount = 0
-	if 'retweetCount' and 'twitter_lang' in tweet :
-		language = tweet['twitter_lang']
-		retweetCount = tweet['retweetCount']
-
-	if language == 'en' and retweetCount > 0:
-		tweeter = tweet['object']['actor']['id'][len('id:twitter.com:') :]
-		retweeter = tweet['actor']['id'][len('id:twitter.com:') :]
-		fs = []
-		if tweeter in followers :
-			fs = followers[tweeter]
-		fs.append(retweeter)
-		followers[tweeter] = fs
-
-degrees = {}
-for k, v in followers.items() :
-	deg = len(v)
-	if deg in degrees :
-		degrees[deg] = degrees[deg] + 1
+	users = line.split()
+	follower = users[0]
+	friend = users[1]
+	if friend in followers :
+		followers[friend] = followers[friend] + 1
 	else :
-		degrees[deg] = 1
+		followers[friend] = 1
 
-for k, v in degrees.items() :
-	print str(k) + ', ' + str(v)
+degreecounts = {}
+for k, v in followers.items() :
+	if v in degreecounts :
+		degreecounts[v] = degreecounts[v] + 1
+	else :
+		degreecounts[v] = 1
+
+for k, v in degreecounts.items():
+	print str(k) + ',' + str(v)

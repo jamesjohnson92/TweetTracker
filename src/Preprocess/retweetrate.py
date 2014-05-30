@@ -22,12 +22,12 @@ for line in f :
 
 				if (creationTime - startTime).total_seconds() > 0 :
 					timeDelta = (retweetTime - startTime).total_seconds() - (creationTime - startTime).total_seconds()
-					print timeDelta
+					#print timeDelta
 					rates = []
 					if tweetid in retweetRates :
 						rates = retweetRates[tweetid]
 					
-					rates.append((tweeter, int(timeDelta/300)))
+					rates.append((tweeter, int(timeDelta/60)))
 					retweetRates[tweetid] = rates
 
 breakoutTweetCounts = {}
@@ -41,6 +41,7 @@ for k, v in retweetRates.items() :
 	for t in timeIndexes :
 		rates[t] = rates[t] + 1
 
+	print ' '.join(map(str, rates))
 	start = 0
 	breakout = 1
 	for r in rates :
@@ -69,8 +70,8 @@ for k, v in breakoutTweetCounts.items() :
 	if k in breakoutRetweetCounts :
 		stat = stat + ', ' + str(breakoutRetweetCounts[k])
 
-	print stat
+	#print stat
 
-for k, v in breakoutRetweetCounts.items() :
-	if k not in breakoutTweetCounts :
-		print str(k) + ', , ' + str(v)
+#for k, v in breakoutRetweetCounts.items() :
+	#if k not in breakoutTweetCounts :
+		#print str(k) + ', , ' + str(v)

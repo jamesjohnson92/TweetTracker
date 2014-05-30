@@ -8,6 +8,7 @@ f2.close()
 USERID_PREFIX = 'id:twitter.com:'
 
 wordCounts = {}
+count = 0
 for line in f :
 	if len(line) == 0 :
 		continue
@@ -29,6 +30,9 @@ for line in f :
 					wordCounts[w] = wordCounts[w] + 1
 				else :
 					wordCounts[w] = 1
+		count = count + 1
+	if count > 5 :
+		break
 	
 for k, v in wordCounts.items() :
 	print k, v
