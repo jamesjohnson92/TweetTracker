@@ -1,6 +1,8 @@
 from mrjob.protocol import JSONValueProtocol, RawValueProtocol
 from mrjob.step import MRStep
 from mrjob.job import MRJob
+from datetime import datetime, timedelta
+
 
 USERID_PREFIX = 'id:twitter.com:'
 
@@ -20,6 +22,7 @@ class TweetTable(MRJob):
             language = tweet['twitter_lang']
 
         if language == 'en' and 'id' in tweet:
+            retweetTime = datetime.strptime(tweet['postedTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
             user = tweet['actor']['id'][len(USERID_PREFIX) :]
             num_followers = 0
             tweetid = tweet['id'][len('tag:search.twitter.com,2005:') : ]
@@ -33,8 +36,10 @@ class TweetTable(MRJob):
             tweetid = tweet['id'][len('tag:search.twitter.com,2005:') : ]
 
             if retweetCount > 0:
+                creationTime = datetime.strptime(tweet['object']['postedTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
                 tweeter = tweet['object']['actor']['id'][len(USERID_PREFIX) :]
-                yield (int(user),int(tweetid)), (int(tweeter), int(num_followers))
+                timeDelta = retweetTime - creationTime
+                yield (int(user),int(tweetid)), (int(tweeter), int(num_followers), int((timeDelta.days * 86400 + timeDelta.seconds)))
 
     def reducer(self, key, values):
         nf = 0
