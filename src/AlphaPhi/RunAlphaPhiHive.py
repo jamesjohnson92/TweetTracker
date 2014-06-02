@@ -15,13 +15,13 @@ if __name__ == "__main__":
                         "-hiveconf","TOPIC=%d" % (i+1)]
                 steps.append(boto.emr.step.HiveStep("Run alpha phi preprocess hive", s3_query_file_uri, hive_args=args))
                 
-        master_instance_type = "m3.xlarge"
-        slave_instance_type = "m3.xlarge"
+        master_instance_type = "c3.xlarge"
+        slave_instance_type = "c3.xlarge"
         jobid = conn.run_jobflow("AlphaPhi Hive Step, Bro", log_uri=log_uri,
                                            steps=steps,
                                            master_instance_type=master_instance_type,
                                            slave_instance_type=slave_instance_type,
-                                           num_instances=1,
+                                           num_instances=5,
                                            enable_debugging=True,
                                            ami_version="latest",
                                            hadoop_version="2.2.0")

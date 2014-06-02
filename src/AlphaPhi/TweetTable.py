@@ -25,36 +25,33 @@ class TweetTable(MRJob):
             retweetTime = datetime.strptime(tweet['postedTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
             user = tweet['actor']['id'][len(USERID_PREFIX) :]
             num_followers = 0
-            tweetid = tweet['id'][len('tag:search.twitter.com,2005:') : ]
-            if retweetCount > 0:
-                tweetid = tweet['object']['id'][len('object:search.twitter.com,2005:') :]
-                if 'followersCount' in tweet['object']['actor']:
-                    num_followers = tweet['object']['actor']['followersCount']
-            elif 'followersCount' in tweet['actor']:
-                num_followers = tweet['actor']['followersCount']
-            tweeter = user
-            tweetid = tweet['id'][len('tag:search.twitter.com,2005:') : ]
 
-            if retweetCount > 0:
-                creationTime = datetime.strptime(tweet['object']['postedTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
-                tweeter = tweet['object']['actor']['id'][len(USERID_PREFIX) :]
-                timeDelta = retweetTime - creationTime
-                yield (int(user),int(tweetid)), (int(tweeter), int(num_followers), int((timeDelta.days * 86400 + timeDelta.seconds)))
+            if retweetCount > 0 and 'object' in tweet and 'actor' in tweet['object']:
+                if tweet['object']['id'][0 : len('tag:search.twitter.com,2005:')] == 'tag:search.twitter.com,2005:':
+                    tweetid = tweet['object']['id'][len('tag:search.twitter.com,2005:') : ]
+                    creationTime = datetime.strptime(tweet['object']['postedTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
+                    tweeter = tweet['object']['actor']['id'][len(USERID_PREFIX) :]
+                    if 'followersCount' in tweet['object']['actor']:
+                        num_followers = tweet['object']['actor']['followersCount']
+                    timeDelta = retweetTime - creationTime
+                    yield (int(tweetid),int(tweeter)), (int(user), int(num_followers), int(timeDelta.days * 86400 + timeDelta.seconds))
 
     def reducer(self, key, values):
         nf = 0
-        store = [] # add no tweets if there aren't enough observations
-        for tweeter, num_followers in values:
+        store_t = [] # add no tweets if there aren't enough observations
+        store_dt = []
+        for tweeter, num_followers, dt in values:
             nf = max(nf, num_followers)
-            if len(store) < MIN_OBSERVED_TWEETS:
-                store.append(tweeter)
+            if len(store_t) < MIN_OBSERVED_TWEETS:
+                store_t.append(tweeter)
+                store_dt.append(dt)
             else:
-              yield None, ('%d %d %d %d ' % (key[0], key[1], tweeter, nf))
+              yield None, ('%d %d %d %d %d ' % (key[0], key[1], tweeter, nf, dt))
               
-        if len(store) == MIN_OBSERVED_TWEETS:
-            yield None, ('%d %d %d %d ' % (key[0], key[1], key[1], nf))
-            for ttweeter in store:
-                yield None, ('%d %d %d %d ' % (key[0], key[1], ttweeter, nf))
+        if len(store_t) == MIN_OBSERVED_TWEETS:
+            yield None, ('%d %d %d %d 0 ' % (key[0], key[1], key[1], nf))
+            for ttweeter, dt in zip(store_t,store_dt):
+                yield None, ('%d %d %d %d %d ' % (key[0], key[1], ttweeter, nf, dt))
 
 
 if __name__ == '__main__':

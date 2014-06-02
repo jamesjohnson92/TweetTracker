@@ -1,7 +1,7 @@
 from mrjob.protocol import JSONValueProtocol, RawValueProtocol
 from mrjob.step import MRStep
 from mrjob.job import MRJob
-from scipi.stats import binom
+from scipy.stats import binom
 
 class EstimateTwitterGraph(MRJob):
 
@@ -17,11 +17,12 @@ class EstimateTwitterGraph(MRJob):
         yield (friend, fu, ru), (follower, ruu)
 
     def reducer(self, key, values):
-        friend = sk[0]
-        fu = sk[1]
-        ru = sk[2]
+        friend = key[0]
+        fu = key[1]
+        ru = key[2]
         hist = {} # asumed to be very small relative to fs
         fs = [] # hopefully not too too big, maybe in the hundreds of thousands.  
+
 
         for follower, ruu in values:
             fs.append((follower,ruu))
@@ -38,7 +39,7 @@ class EstimateTwitterGraph(MRJob):
                     cdf[k] = cdf[k] + v2
 
         for follower, ruu in fs:
-            edgeprob = (fu//cdf[ruu]) * binom.sf(ruu,ru,1//fu)
+            edgeprob = max(1,(fu//cdf[ruu]) * binom.sf(ruu,ru,1//fu))
             yield '%d %d %f ' % (friend, follower, edgeprob)
 
 if __name__ == '__main__':

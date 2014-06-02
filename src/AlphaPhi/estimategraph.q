@@ -5,7 +5,7 @@ drop table if exists rrt;
 drop table if exists twitterpregraph;
 
 create external table tweettable
-       (tweet_id bigint, creator bigint, tweeter bigint, followers bigint)
+       (tweet_id bigint, creator bigint, tweeter bigint, followers bigint, timestamp bigint)
 ROW FORMAT DELIMITED FIELDS TERMINATED BY ' ' LINES TERMINATED BY '\n'
 STORED AS TEXTFILE
 location '${hiveconf:APPATH}/tweettable';
@@ -14,9 +14,9 @@ create external table nrt
        (creator bigint, tweeter bigint, followers bigint, ruu bigint)
 ROW FORMAT DELIMITED FIELDS TERMINATED BY ' ' LINES TERMINATED BY '\n'
 STORED AS TEXTFILE
-location '${hiveconf:APPATH}/nrt'
+location '${hiveconf:APPATH}/nrt';
 
-create external table rtt
+create external table rrt
        (uid bigint, ru bigint)
 ROW FORMAT DELIMITED FIELDS TERMINATED BY ' ' LINES TERMINATED BY '\n'
 STORED AS TEXTFILE
@@ -42,5 +42,5 @@ group by creator;
 insert into table twitterpregraph
 select nrt.creator, nrt.tweeter, nrt.followers, nrt.ruu, rrt.ru
 from nrt join rrt
-on nrt.creator = rrt.creator;
+on nrt.creator = rrt.uid;
 
