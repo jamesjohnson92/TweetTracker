@@ -15,9 +15,9 @@ stopwords='s3n://mrldajarbucket/stopwords';
 setnums='--jobconf mapreduce.job.maps=7 --jobconf mapreduce.job.maps=7 --num-ec2-instances 16 --ec2-master-instance-type m1.large --ec2-instance-type m3.xlarge'
 s3distcpjar='/home/hadoop/lib/emr-s3distcp-1.0.jar' #cluster itself's home
 
-python GenerateTweetCorpus.py $setnums -r emr $indir --output-dir $outdir/corpus;
+#python GenerateTweetCorpus.py $setnums -r emr $indir --output-dir $outdir/corpus;
 #python RunMrJobs.py emr $mrldajar $outdir $nummappers $numreducers $stopwords $temphdfsdir $temphdfsdir2 $s3distcpjar $rankdir
-#python RunTweetTopicHive.py emr $outdir $temphdfsdir3 $s3distcpjar
+python RunTweetTopicHive.py emr $outdir $temphdfsdir3 $s3distcpjar
 
 #priors='/home/curuinor/dev/twitterdat/tweettopic/tweet_priors';
 #wc='/home/curuinor/dev/twitterdat/tweettopic/combined_wc';

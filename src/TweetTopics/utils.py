@@ -17,4 +17,4 @@ def wait_until(pred, timeout, period=30):
 
 master = "m1.large"
 slave = "m3.2xlarge"
-num_instances = 18
+num_instances = 5
