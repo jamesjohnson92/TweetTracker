@@ -8,7 +8,6 @@ USERID_PREFIX = 'id:twitter.com:'
 class MRFollowers(MRJob):
 
     INPUT_PROTOCOL = JSONValueProtocol
-    MAPPER_OUTPUT_PROTOCOL = RawValueProtocol
     OUTPUT_PROTOCOL = RawValueProtocol
 
     def mapper(self, _, tweet):
