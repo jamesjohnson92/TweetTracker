@@ -23,7 +23,6 @@ class EstimateTwitterGraph(MRJob):
         hist = {} # asumed to be very small relative to fs
         fs = [] # hopefully not too too big, maybe in the hundreds of thousands.  
 
-
         for follower, ruu in values:
             fs.append((follower,ruu))
             if ruu in hist:
@@ -32,15 +31,17 @@ class EstimateTwitterGraph(MRJob):
                 hist[ruu] = 1
 
         cdf = {}
-        for k,v in hist:
+        for k,v in hist.iteritems():
             cdf[k] = v
-            for k2, v2 in hist:
-                if k2 < k1:
+            for k2, v2 in hist.iteritems():
+                if k2 < k:
                     cdf[k] = cdf[k] + v2
 
         for follower, ruu in fs:
-            edgeprob = max(1,(fu//cdf[ruu]) * binom.sf(ruu,ru,1//fu))
-            yield '%d %d %f ' % (friend, follower, edgeprob)
+            edgeprob = 0                
+            if not fu == 0:
+                edgeprob = max(1,(fu//cdf[ruu]) * binom.sf(ruu,ru,1//fu))
+            yield None, ('%d %d %f ' % (friend, follower, edgeprob))
 
 if __name__ == '__main__':
     EstimateTwitterGraph.run()
