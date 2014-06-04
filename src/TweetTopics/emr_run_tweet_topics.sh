@@ -17,9 +17,9 @@ s3distcpjar='/home/hadoop/lib/emr-s3distcp-1.0.jar' #cluster itself's home
 
 #python GenerateTweetCorpus.py $setnums -r emr $indir --output-dir $outdir/corpus;
 #python RunMrJobs.py emr $mrldajar $outdir $nummappers $numreducers $stopwords $temphdfsdir $temphdfsdir2 $s3distcpjar $rankdir
-python RunTweetTopicHive.py emr $outdir $temphdfsdir3 $s3distcpjar
+#python RunTweetTopicHive.py emr $outdir $temphdfsdir3 $s3distcpjar
 
-#priors='/home/curuinor/dev/twitterdat/tweettopic/tweet_priors';
-#wc='/home/curuinor/dev/twitterdat/tweettopic/combined_wc';
-#wp='/home/curuinor/dev/twitterdat/tweettopic/combined_wp';
-#python TweetTopics.py $priors $wc $wp;
+priors='/home/curuinor/dev/twitterdat/tweettopic/tweet_priors';
+wc='/home/curuinor/dev/twitterdat/tweettopic/combined_wc';
+wp='/home/curuinor/dev/twitterdat/tweettopic/combined_wp';
+python TweetTopics.py $priors $wc $wp;
