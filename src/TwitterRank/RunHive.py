@@ -5,7 +5,7 @@ from utils import *
 if __name__ == "__main__":
     if sys.argv[1] == "emr":
         conn = boto.emr.connect_to_region("us-east-1") #north virginia
-        s3_query_file_uri = u's3://mrldajarbucket/ldapostprocess.q'
+        s3_query_file_uri = u's3://mrldajarbucket/ldapostprocess1.q'
         log_uri = u's3://tweettrack/Twitterrank_Log/Hive_log'
         postprocess_args = ["-hiveconf","TROPATH=%s" % sys.argv[2]]
         print postprocess_args
