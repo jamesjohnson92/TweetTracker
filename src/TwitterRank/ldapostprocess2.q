@@ -1,4 +1,3 @@
-
 create external table if not exists twittergraph(
        follower_id bigint, 
        friend_id bigint,
@@ -23,12 +22,6 @@ create external table if not exists pregraphout (
 ROW FORMAT DELIMITED FIELDS TERMINATED BY ' ' LINES TERMINATED BY '\n'
 STORED AS TEXTFILE
 location '${hiveconf:TROPATH}/pregraph';
-
-create external table if not exists gamma_sums_out (
-       gam0 double, gam1 double, gam2 double, gam3 double, gam4 double, gam5 double, gam6 double, gam7 double, gam8 double, gam9 double, gam10 double, gam11 double, gam12 double, gam13 double, gam14 double, gam15 double, gam16 double, gam17 double, gam18 double, gam19 double, gam20 double, gam21 double, gam22 double, gam23 double, gam24 double, gam25 double, gam26 double, gam27 double, gam28 double, gam29 double)
-ROW FORMAT DELIMITED FIELDS TERMINATED BY ' ' LINES TERMINATED BY '\n'
-STORED AS TEXTFILE
-location '${hiveconf:TROPATH}/gammasums';
 
 insert into table pregraphout
 select twittergraph.follower_id as follower_id, 
