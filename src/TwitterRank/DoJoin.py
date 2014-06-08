@@ -36,20 +36,43 @@ def key_iterator(key):
         for line in lines:
             yield line
 
-def do_join(folder_name, followertable, bucket):
+def get_friend_gammas(folder_name, bucket):
+	"""
+	This is barely kosher because ldaout is 4.5 gigs
+	Use a big fucking instance
+	"""
     keys = bucket.list(folder_name)
-    buf = [] #something
+	friendgammas = {}
+	for f in keys:
+        print f
+        contents = f.get_contents_as_string(cb=progress_cb)
+        for line in contents.split('\n'):
+            split_line = line.split()
+            if split_line and len(split_line) == whatever:
+                follower_id, friend_id, number = line.split() ####
+				friendgammas[str(friend_id)] = some old shit ####
+    return friendgammas
+
+def do_join(folder_name, followertable, friendgammas bucket):
+	"""
+	Goes through follower gammas and does the join
+	"""
+    keys = bucket.list(folder_name)
+    buf = []
 	count = 0
+	save_size = 50000000
     for f in keys:
         f_iter = key_iterator(f)
+		f_size = f.size
         for line in f_iter:
 			table_key = str((follower_id, friend_id))
 			if table_key in followertable:
 				count += 1
-				newline = something something ####
+				newline = something something #### find out from the join
 				buf.append(newline)
-				if count % 50000000 == 0:
-					save this shit to remote ####@
+				if count % save_size == 0:
+					save this shit to remote #### figure this out
+					print "saving... %d, total size of file is %d" % (count // save_size, f_size)
 					buf = []
 
 def main(args):
@@ -70,7 +93,8 @@ def main(args):
     else:
         with open(sys.argv[3], "r") as followertable_file:
             followertable = simplejson.load(followertable_file)
-    do_join(args[2], followertable, bucket)
+	friendgammas = get_friend_gammas(args[2], bucket)
+    do_join(args[2], followertable, friendgammas bucket)
     conn.close()
 
 if __name__ == "__main__":

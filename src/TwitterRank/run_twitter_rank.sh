@@ -20,9 +20,10 @@ setnums='--jobconf mapreduce.map.tasks=5 --jobconf mapreduce.reduce.tasks=5 --nu
 #python RunMrJobsDispDoc.py emr $mrldajar $outdir $nummappers $numreducers $numtopics $stopwords $temphdfsdir $s3distcpjar;
 #python FollowersTable.py -c mrjob.conf -r emr $indir --output-dir $outdir/followertable ###create the ldapostprocess now
 
-###do this locally
+#RunHive.py runs fine, RunHive2.py does not: it manages to join like 1kb/minute, this is not acceptable. local is faster, depressingly
 #python RunHive.py emr $outdir $temphdfsdir $s3distcpjar;
 #python RunHive2.py emr $outdir $temphdfsdir $s3distcpjar;
+###do this locally
 python DoJoin.py Twitterrank_Full_Output/followertable Twitterrank_Full_Output/ldaout followertable.json
 
 ###do these non-locally
