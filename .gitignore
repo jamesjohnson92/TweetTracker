@@ -31,7 +31,6 @@
 *.pyc
 
 # other stuff
-*.png
 
 # EMACS problems
 *~
