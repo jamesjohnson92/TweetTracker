@@ -22,7 +22,8 @@ setnums='--jobconf mapreduce.map.tasks=5 --jobconf mapreduce.reduce.tasks=5 --nu
 
 ###do this locally
 #python RunHive.py emr $outdir $temphdfsdir $s3distcpjar;
-python RunHive2.py emr $outdir $temphdfsdir $s3distcpjar;
+#python RunHive2.py emr $outdir $temphdfsdir $s3distcpjar;
+python DoJoin.py Twitterrank_Full_Output/followertable Twitterrank_Full_Output/ldaout followertable.json
 
 ###do these non-locally
 #python GenerateGraph.py  -c mrjob.conf -r emr $outdirnoslash/pregraph/ --numtopics $numtopics --sumgamma $outdirnoslash/gammasums/200539cf-0395-443c-97f5-b0ac0ae284aa_000000 --output-dir $outdirnoslash/graph --enable-emr-debugging --no-output; ##this is very fragile, do the gammasums right
