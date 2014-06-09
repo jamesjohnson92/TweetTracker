@@ -27,9 +27,9 @@ setnums='--jobconf mapreduce.map.tasks=5 --jobconf mapreduce.reduce.tasks=5 --nu
 #python GammaJoin.py Twitterrank_Full_Output/followertable Twitterrank_Full_Output/ldaout Twitterrank_Full_Output/pregraph followertable.json
 
 ###do these non-locally
-python GenerateGraph.py  -c mrjob.conf -r emr $outdirnoslash/pregraph/ --numtopics $numtopics --sumgamma $outdirnoslash/gammasums/200539cf-0395-443c-97f5-b0ac0ae284aa_000000 --output-dir $outdirnoslash/graph --enable-emr-debugging --no-output; ##this is very fragile, do the gammasums right
+#python GenerateGraph.py  -c mrjob.conf -r emr $outdirnoslash/pregraph/ --numtopics $numtopics --sumgamma $outdirnoslash/gammasums/200539cf-0395-443c-97f5-b0ac0ae284aa_000000 --output-dir $outdirnoslash/graph --enable-emr-debugging --no-output; ##this is very fragile, do the gammasums right
 #python GraphRank.py  -c mrjob.conf -r emr $outdirnoslash/graph/ --output-dir $outdirnoslash/twitterrank --enable-emr-debugging --no-output;
-#python FinalizeTwitterRank.py  $setnums -r emr $outdirnoslash/twitterrank/ --output-dir $outdirnoslash/twitterranktable --no-output;
+python FinalizeTwitterRank.py  $setnums -r emr $outdirnoslash/twitterrank/ --output-dir $outdirnoslash/twitterranktable --no-output;
 
 
 

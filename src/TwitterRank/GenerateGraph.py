@@ -1,3 +1,4 @@
+from __future__ import division
 from mrjob.protocol import JSONProtocol
 from mrjob.step import MRStep
 from mrjob.job import MRJob
@@ -59,8 +60,13 @@ class GenerateTRGraph(MRJob):
             trg_num_tweets = links[i][1]
             trg_gamma = links[i][2]
             trg_gamma_sum = sum(trg_gamma)
-            weights = [(1 - abs(sg/(src_gamma_sum + 0.05) - tg/(trg_gamma_sum + 0.05))) * trg_num_tweets / (out_tweets + 1) for sg,tg in zip (src_gamma,trg_gamma)]
-            links[i] = (trg, weights)
+            if trg_gamma_sum == 0:
+                continue
+            try:
+                weights = [(1 - abs(sg/src_gamma_sum - tg/trg_gamma_sum)) * trg_num_tweets / out_tweets for sg,tg in zip (src_gamma,trg_gamma)]
+                links[i] = (trg, weights)
+            except:
+                links[i] = (trg, [0 for sg in zip(src_gamma)])
 
         src_telep_prob = [g/sg for g,sg in zip(src_gamma,self.gamma_sums)]
 
