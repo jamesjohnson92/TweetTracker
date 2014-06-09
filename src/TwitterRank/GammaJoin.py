@@ -1,5 +1,5 @@
-import sys, os, re, time
-import simplejson, boto
+import sys, os, re, time, resource, gc
+import ujson, boto
 import boto.s3.connection
 from collections import defaultdict
 
@@ -56,9 +56,10 @@ def get_gammas(folder_name, bucket):
             count += 1
             split_line = line.split()
             if split_line and len(split_line) == 31:
-                gammas[str(split_line[0])] = split_line[1:]
-            if count % 50000 == 0:
+                gammas[str(split_line[0])] = map(float, split_line[1:])
+            if count % 100000 == 0:
                 print "count is now : %d" % (count,)
+                print "usage is : %d kb" % (resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,)
     return gammas
 
 def do_join(output_folder_name, followertable, gammas, bucket):
@@ -67,29 +68,28 @@ def do_join(output_folder_name, followertable, gammas, bucket):
     """
     buf = []
     count = 0
-    save_size = 50000000
+    save_size = 100000 
     for followtup, tweet_count in followertable.iteritems():
-        tup = tuple(followtup)
-        friend_id = int(tup[0])
-        follower_id = int(tup[1])
+        tup = tuple(int(v) for v in re.findall("[0-9]+", followtup))
+        friend_id = str(tup[0])
+        follower_id = str(tup[1])
         if friend_id in gammas and follower_id in gammas:
             count += 1
             toJoin = []
-            toJoin.append(str(follower_id))
+            toJoin.append(follower_id)
             toJoin = toJoin + gammas[follower_id]
-            toJoin.append(str(friend_id))
+            toJoin.append(friend_id)
             toJoin.append(tweet_count)
             toJoin = toJoin + gammas[friend_id]
-            joined_line = " ".join(toJoin)
+            joined_line = " ".join(map(str, toJoin))
             buf.append(joined_line)
             if count % save_size == 0:
-                output_name = output_folder_name + str(count // save_size)
+                output_name = output_folder_name + "/part-m-000" + str(count // save_size)
                 print "output name is: %s " % (output_name,)
                 print "here's a thing from the buffer: %s", buf[1]
-                #dry run
-                #new_file = bucket.new_key(output_name)
-                #new_file.set_contents_from_string("\n".join(buf))
-                print "saving... %d, total size of file is %d" % (count // save_size, f_size)
+                new_file = bucket.new_key(output_name)
+                new_file.set_contents_from_string("\n".join(buf))
+                print "saving... %d" % (count // save_size,)
                 buf = []
 
 def main(args):
@@ -106,11 +106,20 @@ def main(args):
         assert followertable is not None
         print "followertable is this long: %d, and we're saving it" % (len(followertable),)
         with open("followertable.json", "w") as followertable_file:
-            simplejson.dump(followertable, followertable_file)
+            ujson.dump(followertable, followertable_file)
     else:
+        print "followerstable..."
         with open(sys.argv[4], "r") as followertable_file:
-            followertable = simplejson.load(followertable_file)
+            followertable = ujson.load(followertable_file)
+        print "followerstable done..."
+        #print "gammas..."
+        #with open(sys.argv[5], "r") as gamma_file:
+        #    gammas = ujson.load(gamma_file)
+        #    gc.collect()
+        #print "gammas done..."
     gammas = get_gammas(args[2], bucket)
+    #with open("gammas.json", "w") as gamma_file:
+    #    ujson.dump(gammas, gamma_file)
     do_join(args[3], followertable, gammas, bucket)
     conn.close()
 
