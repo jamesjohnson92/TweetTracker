@@ -1,6 +1,10 @@
 from mrjob.job import MRJob
 from mrjob.protocol import RawValueProtocol
 import json as simplejson
+from stemming.porter2 import stem
+import enchant
+import string
+import ujson
 
 TWEETID_PREFIX = 'tag:search.twitter.com,2005:'
 
@@ -44,13 +48,13 @@ class GenerateTweetCorpus(MRJob):
                 word = self.prepare_word(the_tweet[i])
                 if word:
                     result.append(word)
-            if 'object' in tweet and 'actor' in tweet['object'] and 'id' in tweet['object']['actor'] and 'retweetCount' in tweet and int(tweet['retweetCount']) > 0:
-                tweetid = tweet['object']['id'][len('tag:search.twitter.com,2005:') : ]
+            if 'object' in tweet 'retweetCount' in tweet and int(tweet['retweetCount']) > 0:
+                tweetid = tweet['object']['id'][len('object:search.twitter.com,2005:') : ]
             yield int(tweetid), ' '.join(result)
 
     def reducer(self, tweetid, tweets):
         for t in tweets:
-            yield None, "%s\t%s" % (user,t)
+            yield None, "%s\t%s" % (tweetid,t)
             return
 
 if __name__ == '__main__':

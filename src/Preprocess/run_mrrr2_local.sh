@@ -1,1 +1,1 @@
-python MRRetweetRate2.py -r emr 's3n://tweettrack/Twitter_Teacup/' --output-dir 's3n://tweettrack/TTR_Output/';
+python  MRRetweetRate2.py -c mrjob.conf -r emr 's3n://tweettrack/Twitter_Firehose_Subset/' --output-dir 's3n://tweettrack/TTR_Full_Output' --no-output --jobconf mapred.skip.map.max.skip.records=100;

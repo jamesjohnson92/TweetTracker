@@ -23,19 +23,19 @@ if __name__ == "__main__":
         class5 = u'cc.mrlda.DisplayBeta'
         class6 = u'cc.mrlda.DisplayPrior'
         classes = (None, None, class3, class4, class5, class6)
-        args1 = [u'--src', outdir + "corpus",
-                 u'--dest', tempdir + "corpus"]
+        args1 = [u'--src', outdir + "tweetcorpus",
+                 u'--dest', tempdir + "tweetcorpus"]
         args2 = [u'--src', rankdir + "parsecorpus/term",
                  u'--dest', tempdir2 + "parsecorpus/term"]
         args3 = [
                 u'-index', tempdir2 + "parsecorpus/term",
-                u'-input', tempdir + "corpus",
-                u'-output', tempdir + "parsecorpus",
+                u'-input', tempdir + "tweetcorpus",
+                u'-output', tempdir + "parsetweetcorpus",
                 u'-mapper', nummappers,
                 u'-reducer', numreducers,
                 u'-stoplist', stopwords]
         args4 = [
-                u'-input', tempdir + "parsecorpus/document",
+                u'-input', tempdir + "parsetweetcorpus/document",
                 u'-output', outdir + "wordcounts"]
         args5 = [
                 u'-input', rankdir + "ldapreout/beta-5",

@@ -2,6 +2,7 @@ import sys
 import simplejson
 from collections import defaultdict
 
+
 def read_priors(priors_filename):
 	priors = {}
 	print "Beginning on priors..."
@@ -68,14 +69,16 @@ def process_ll(priors, ll_filename="ll_file", lrp_filename="lrp_file"):
 def process_lrp(lrp_filename="lrp_file", ml_filename="ml_file"):
 	print "Beginning on lrp to ml.."
 	max_lrps = defaultdict(lambda: float("-inf"))
+	max_topics = defaultdict(lambda: int("0"))
 	with open(lrp_filename, 'r') as lrp_file:
 		for line in lrp_file:
 			lrp_id, topic, logrelprob = line.split()
 			if max_lrps[lrp_id] < float(logrelprob):
 				max_lrps[lrp_id] = logrelprob #note stays a string
+				max_topics[lrp_id] = topic
 	with open(ml_filename, 'w') as ml_file:
 		for ml_id, logrelprob in max_lrps.iteritems():
-			print>>ml_file, " ".join((ml_id, logrelprob))
+			print>>ml_file, " ".join((ml_id, max_topics[ml_id], logrelprob))
 	print "Finishing on lrp to ml.."
 
 def process_tt(ml_filename="ml_file", lrp_filename="lrp_file", tt_filename="tt_file"):

@@ -2,6 +2,7 @@ from mrjob.job import MRJob
 import json as simplejson
 from mrjob.protocol import RawValueProtocol
 from datetime import datetime, timedelta
+import ujson
 
 class MRRetweetRate(MRJob):
 	
@@ -13,14 +14,18 @@ class MRRetweetRate(MRJob):
     NUM_PARTITIONS = 60*60/PARTITION_SECS # record for an hour
 
     def mapper(self, _, line):
+        try:
+            tweet = ujson.loads(line)
+        except:
+            tweet = {}
         startTime = datetime.strptime('2014-03-01T00:00:00.000Z', '%Y-%m-%dT%H:%M:%S.%fZ') 
-        endTime = datetime.strptime('2014-03-01T02:00:00.000Z', '%Y-%m-%dT%H:%M:%S.%fZ') 
-        tweet = simplejson.loads(line)
-        if 'twitter_lang' in tweet : 
+        endTime = datetime.strptime('2014-03-05T23:00:00.000Z', '%Y-%m-%dT%H:%M:%S.%fZ') 
+        if 'twitter_lang' in tweet :
+            print "hi"
+
             language = tweet['twitter_lang']
             if language == 'en' :
                 if 'id' in tweet and 'retweetCount' in tweet :
-                    tweetid = tweet['id'][len('tag:search.twitter.com,2005:') : ]
                     retweetTime = datetime.strptime(tweet['postedTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
                     creationTime = retweetTime
                     favoritesCount = tweet['favoritesCount']
@@ -30,17 +35,18 @@ class MRRetweetRate(MRJob):
                     favs = tweet['actor']['favoritesCount']
 
                     if tweet['retweetCount'] > 0 :
-                        tweetid = tweet['object']['id'][len('object:search.twitter.com,2005:') :]
+                        tweetid = tweet['object']['id'].split(':')[2]
                         creationTime = datetime.strptime(tweet['object']['postedTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
                         favoritesCount = tweet['object']['favoritesCount']
                         fols = tweet['object']['actor']['followersCount']
                         frds = tweet['object']['actor']['friendsCount']
                         favs = tweet['object']['actor']['favoritesCount']
 
+                        print "hi again"
 
-                    if creationTime >= startTime and creationTime <= endTime :
-                        timeDelta = retweetTime - creationTime
-                        yield tweetid, (fols,frds,favs,int((timeDelta.days * 86400 + timeDelta.seconds)), retweetCount, favoritesCount)
+                        if creationTime >= startTime and creationTime <= endTime :
+                            timeDelta = retweetTime - creationTime
+                            yield tweetid, (fols,frds,favs,int((timeDelta.days * 86400 + timeDelta.seconds)), retweetCount, favoritesCount)
                             
     def reducer(self, tweetid, timestamps):
 
