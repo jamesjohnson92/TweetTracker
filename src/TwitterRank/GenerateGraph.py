@@ -46,21 +46,20 @@ class GenerateTRGraph(MRJob):
         src_gamma_sum = sum(src_gamma)
         for line in vals:
             if line == 'no_val':
-                pass
-            else:
-                splitline = line.split(' ')
-                trg = int(splitline[0])
-                trg_num_tweets = int(splitline[1])
-                out_tweets += trg_num_tweets
-                trg_gamma = map(float, splitline[2:])
-                links.append((trg, trg_num_tweets, trg_gamma))
+                continue
+            splitline = line.split(' ')
+            trg = int(splitline[0])
+            trg_num_tweets = int(splitline[1])
+            out_tweets += trg_num_tweets
+            trg_gamma = map(float, splitline[2:])
+            links.append((trg, trg_num_tweets, trg_gamma))
 
         for i in xrange(len(links)):
             trg = links[i][0]
             trg_num_tweets = links[i][1]
             trg_gamma = links[i][2]
             trg_gamma_sum = sum(trg_gamma)
-            weights = [(1 - abs(sg/src_gamma_sum - tg/trg_gamma_sum)) * trg_num_tweets / out_tweets for sg,tg in zip (src_gamma,trg_gamma)]
+            weights = [(1 - abs(sg/(src_gamma_sum + 0.05) - tg/(trg_gamma_sum + 0.05))) * trg_num_tweets / (out_tweets + 1) for sg,tg in zip (src_gamma,trg_gamma)]
             links[i] = (trg, weights)
 
         src_telep_prob = [g/sg for g,sg in zip(src_gamma,self.gamma_sums)]

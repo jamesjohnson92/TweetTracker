@@ -68,7 +68,7 @@ def do_join(output_folder_name, followertable, gammas, bucket):
     """
     buf = []
     count = 0
-    save_size = 100000 
+    save_size = 100000
     for followtup, tweet_count in followertable.iteritems():
         tup = tuple(int(v) for v in re.findall("[0-9]+", followtup))
         friend_id = str(tup[0])

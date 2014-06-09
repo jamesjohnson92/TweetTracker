@@ -27,5 +27,5 @@ def read_mrjobs_args(args):
     return (mrjobsjar, outdir, nummappers, numreducers, numtopics, stopwords, tempdir, s3distcpjar)
 
 master = "m1.large"
-slave = "c3.xlarge"
+slave = "r3.xlarge"
 num_instances = 6
