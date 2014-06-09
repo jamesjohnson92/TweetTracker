@@ -59,12 +59,20 @@ To compute the \texttt{RetweetRank}, $RR_{u,t}$, use Algorithm~\ref{alg:tralg} w
 
 \subsection{Tweet Features from Retweet Rank}
 
-Given a brand new tweet $s$ from user $u$, the $RR_u^t$ give a strong and immidiate first guess at the eventual popularity of the tweet.  If, further, we wait until time $p$ after a tweet is posted, we can compute tweet features
+Given a brand new tweet $s$ from user $u$, the $RR_u^t$ give a strong and immidiate first guess at the eventual popularity of the tweet.  If, further, we wait until time $p$ after a tweet is posted, we can compute ``partial \texttt{TwitterRank}'' features as follows:
 \[RR_{s,t}^{(p)} = \sum_{u\in\mathcal{R}_s^{(p)}}RR_{u,t}\]
 where $\mathcal{R}_s^{(p)}$ is the set of users who have retweeted $s$ within a time $p$ after $s$ was posted.  
 We compute these for a few values of $p$.
 Finally, if we wish to remove features we can compute overall \texttt{RetweetRank},
 \[RR_{u} =\sum_t RR_{u,t}\]
 \[RR_{s}^{(p)} \sum_t RR_{s,t}^{(p)}\]
+The $RR_s^{(p)}$ features should be thought of as a fancy version of the retweet rate, since it is just a weighted sum over the $\mathcal{R}_u^{(p)}$.  We graph it against the eventual number of retweets.  As you can see in Figure~\ref{fig:partialpair}, there is a correlation between the eventual number of retweets and the partial retweet rank.  
 Note that it was still useful to have topics when computing the ranks originally, as this allows for a much richer space of models, even if we only ever use the aggregate over topics.    
 
+
+
+The $RR_{u}$ features follow, not surprisingly, a power-law-like distribution.
+Most users have very small \texttt{RetweetRank}, but a handful have extremely large ranks.  
+We take logs to make this feature manageable.  
+
+\label{sec:rtrfeatues}

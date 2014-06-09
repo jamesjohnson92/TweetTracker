@@ -12,8 +12,7 @@ class FinalizeTwitterRank(MRJob):
     OUTPUT_PROTOCOL = RawValueProtocol
 
     def mapper(self, key, user):
-        if user["node_id"]:
-            yield None, ("%d %s " % (key, ' '.join(user["node_id"])))
+        yield None, ("%d %s " % (key, ' '.join(map(str,user["score"]))))
 
 if __name__ == '__main__':
     FinalizeTwitterRank.run()

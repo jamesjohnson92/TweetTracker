@@ -19,6 +19,7 @@ results = matrix(0,9,10)
 for (i in 1:10)
 {
     print (i)
+    break
     rtrstr = paste(paste("log(0.00001 + partialretweetrank",20*(1:(3*i)),")",sep=''),collapse="+")
     logrrtstr = paste(paste("logrrt",20*(1:(3*i)),sep=''),collapse="+")
     fmlafull = as.formula(paste("logrrt3360 ~ log(0.00001 + retweetrank) + log(friends+1) + log(followers+1) + ",rtrstr,"+",logrrtstr))

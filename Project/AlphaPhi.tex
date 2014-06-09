@@ -99,8 +99,7 @@ This is actually a good thing: at the very least we won't dramatically overestim
 We get
 \begin{eqnarray}
   \Prob{u\to u'~|~R_{u,u'}\ge r} &=& \frac{\Prob{u\to u'}\Prob{R_{u,u'}\ge r~|~u\to u'}}{\Prob{R_{u,u'}\ge r}}\nonumber\\
-  &=& \pfrac{F_{u'}}{N}\pfrac{N-1}{\#\{a : R_{a,u'}\ge r\}}\Prob{\mbox{Binomial}(1/F_{u'},R_{u'}) \ge r}\nonumber
-abel{eq:edgeprob}
+  &=& \pfrac{F_{u'}}{N}\pfrac{N-1}{\#\{a : R_{a,u'}\ge r\}}\Prob{\mbox{Binomial}(1/F_{u'},R_{u'}) \ge r}\label{eq:edgeprob}
 \end{eqnarray}
 
 As a sanity check, if $r=0$, this should be approximately zero.
@@ -113,7 +112,7 @@ If $F_{u'}=1$ and only one person retweets, that one person is a follower with p
 Now, for any user $u$ and tweet $s$, we have
 \begin{eqnarray}
   \Prob{\mbox{$u$ retweets $s$}} &=& \Prob{\mbox{$u$ has seen $s$}}\alpha_s\phi_{u,\tau_s}\nonumber\\
-  &=&\left(1-\prod_{u':b_{s,u'}=1}(1-\Prob{u\to u'~|~R_{u,u'}})\right)\alpha_s\phi_{u,\tau_s}\label{eq:apeqfinal}
+  &=&\left(1-\prod_{u':b_{s,u'}=1}(1-\Prob{u\to u'~|~R_{u,u'}})\right)\alpha_s\phi_{u,\tau_s} \label{eq:apeqfinal}
 \end{eqnarray}
 where $b_{s,u'}$ indicates $u'$ retweeting $s$, as in equation~\eqref{eq:aplikelihood}.  
 We can still optimize individual parameters in Algorithm~\ref{alg:apalg} with only a slight modification; they key properties of the likelihood function still hold.  
@@ -125,28 +124,25 @@ Thus we propose the following predictive features based on this model.
 
 \label{sec:apfeature}
 
-When a new tweet $s$ is observed at time $p$ after its creation, giving early observations of its retweet behavior, we can (easily) compute estimate $\alpha_s^{(p)}$, which we call the partial $\alpha$ at time $p$. 
+When a new tweet $s$ is observed at time $p$ after its creation, giving early observations of its retweet behavior, we can (easily) compute estimate $\alpha_s^{(p)}$, which we call the ``partial alpha'' at time $p$, and to contrast we call $\alpha_s$ the ``total alpha''.  
 We use values of $\alpha_s^{(p)}$ for a few small values of $p$ as high powered features to predict the eventual popularity of $s$.
 
 Another useful feature, given a tweet $s$ of topic $t$ at time $p$ after its creation, is the average value of the $\phi_{u,t}$ for each $u$ that retweeted $s$ so far.
-We call this feature $\phi_s^{(p)}$. 
+We call this feature $\phi_s^{(p)}$, and it ended up doing pretty well in linear and random forest models (Figure~\ref{fig:linearattempts} and Figure~\ref{fig:rfattempts}).  This feature should be thought of as a fancy version of the retweet rate itself, since it is essentially a weighted sum over the $\mathcal{R}_u^{(p)}$.  
 
 \subsection{Interpreting the parameters}
+
 
 Not surprisingly, most of the $\phi_{u,t}$'s are zero: most users don't ever retweet things of most topics (some users rarely retweet at all).
 In fact, 98.8\% of all the $\phi_{u,t}$ values were zero, while 1.1\% were exactly one.
 Explaining the second fact is equally easy: some people retweet almost everything they see from a topic (recall our learning algorithm optimized by binning, so to report a $\phi_{u,t}=1.0$ merely means its closer to 1 than 0.86).  
-In the middle, there is a nice spread, as one might expect, see Figure~\ref{fig:phihist}.
+In the middle, there is a nice spread, as one might expect.  
 
 Interpreting the $\alpha$ parameters must be done with care, especially when trying to predict the eventual number of retweets.
 Indeed, and $\alpha$ can be high both because it was often retweeted and because it was seldom seen.
 Users with very few followers often produced these high quality tweets, although many of the most retweeted also had very high quality.
-Conversely, a tweet could be low quality because it was over-exposed.  We graph
+Conversely, a tweet could be low quality because it was over-exposed.  We look at the plot (Figure~\ref{fig:animals}) $\alpha_s$ and $\alpha_s\log(F_u+1)$ versus the $\log(R_s^{1hr}+1)$, log of the number of retweets after an hour.  
+The relationships are complicated, but not surprising.  
+One notices most tweets are banded along $\alpha_s=0$ and number $R_s^{1hr}\le 3$.  
+Outside of these ``most tweets are boring'' bands, we see what looks like a positive correlation between $\alpha_s\log(F_u+1)$ and the number of retweets, as we should expect; users with many followers and high quality tweets get many retweets.  However, even very retweeted tweets can have low alpha as they are overly visible among people with positive phi's in that topic.  
 
-\begin{figure}[h!]
-  \centering
-   \includegraphics[width=0.5\textwidth]{../src/Analysis/phihist.png}
-   \caption{The distribution of the $\phi_{u,t}$ parameters after removing those with values zero or one. }
-   \label{fig:phihist}
-  
-\end{figure}

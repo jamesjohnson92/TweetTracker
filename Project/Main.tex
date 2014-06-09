@@ -11,7 +11,7 @@
 %%\usepackage[small,nohug,heads=LaTeX]{diagrams}
 %%\diagramstyle[labelstyle=\scriptstyle]
 \usepackage[pdftex]{graphicx}
-\usepackage{fullpage}
+\usepackage[margin=0.45in]{geometry}
 \usepackage{hyperref}
 \usepackage{subfiles}
 \usepackage{appendix}
@@ -41,15 +41,17 @@
 \subfile{TwitterRank.tex} 
 \subfile{AlphaPhi.tex} 
 \subfile{Model.tex}
-\subfile{Results.tex}
 
-%\appendix
-%\appendixpage
-%\addappheadtotoc
+
+\subfile{Notation.tex}
+
+\subfile{Figures.tex}
+
 
 \newpage
 \bibliographystyle{alpha}
 \bibliography{myrefs}
+
 
 
 \end{document}

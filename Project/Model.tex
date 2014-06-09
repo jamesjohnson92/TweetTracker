@@ -1,1 +1,57 @@
-\section{Building a Model}
+\section{Experimental Setup and Results}
+
+\subsection{Feature Computation}
+
+We extracted a topic model using 30-topic LDA for all 3,296,605 users active between March 1, 2014 and March 5, 2014, and went on to compute their \texttt{RetweetRank} using all tweets and retweets posted during this period.  
+
+From this period, a random sample of 10,000 tweets were selected, on which \texttt{AlphaPhi} was computed using the twitter graph inferred during this time and all 93,151 users inferred to have seen these 10,000 tweets.  
+We also, for a period of 1 hour after the creation of each tweet, record $R_s^{(p)}$ every twenty seconds.
+Finally, for the first ten minutes after each tweet is posted, we compute $\alpha_s^{(p)}$, $\phi_s^{(p)}$ and $RR_s^{(p)}$ in twenty second intervals, using the $\phi$'s computed before.
+
+
+\subsection{The harder problem: Predicting the number of retweets after an hour from data at time $p$.}
+
+It is a very difficult problem to predict very heavy-tailed distributions where most tweets have very few retweets, but some small number have very many.
+We attempt it anyways. 
+For each minute $p$ in the first ten minutes, we build a machine learning model to predict $\log(R_s^{1hr}+1)$ from the predictors available at time $p$.  
+We report the 5 fold cross validation with two repeats for each model and report the root mean squared error in the predicted logarithm.  
+The machine learning models we use are linear regression, support vector regressions and random forests (all untuned because of the long time it takes to fit the number of models we want to fit).  
+
+In each run we use a different feature set described in this paper, plus ambient features logs of the friend count and followers count.  
+
+\subsection{The Doable Problem: Predicting Cascades}
+
+As described in \cite{DBLP:journals/corr/ChengADKL14}, there is a brilliant way of overcoming the difficulty of heavy tails.
+Balanced classification problems are inherently easier than highly unbalanced regressions.
+Luckily, because the number of retweets a tweet eventually gets ought to follow a power law, the probability of a tweet doubling its retweet count is about 50-50.  
+Thus, for each $i\in\{1,...,8\}$ we predict, using a support vector machine, if a tweet with at least $2^i$ retweets will reach $2^{i+1}$ retweets.
+
+The features we use for this prediction are the ambient features from before, plus
+\[p_{s,i}=min p~:~R_s^{(p)}\ge 2^i\]
+and features $RT^{(p_{s,i})}_s$, $\alpha^{(p_{s,i})}_s$ and $\phi^{(p_{s,i})}_s$.
+We also experiment with using $\alpha_s$ itself for prediction, although this is impossible in real applications due to it not yet being known.  
+
+
+\section{Results}
+
+\subsection{Results for the Regression Problem}
+
+The results for regression are summarized in Figure~\ref{fig:linearattempts}, Figure~\ref{fig:svmattempts}, Figure~\ref{fig:rfattempts}.  
+In each graph we include the best possible constant predictor (always predict the log mean), and in almost ever case, we beat it (sadly, the partial alphas times the log of the number of followers actually does worse when given later data!).
+
+Without fancy features, the naive first try would be to just use logs of $R_s^{(p)}$: this is the thing to beat.
+Notice first of all that most features sets which do not use $R_s^{(p)}$ do much worse than it; the exception being linear models on the partial \texttt{RetweetRank} (Figure~\ref{fig:linearattempts} orange).  
+This is sad, but not surprising, as these things try to encode fancy information not directly related to what we are computing, while the retwet rates are literally early predictors of this response, and at least they beat the constant estimator.  
+Some features sets do worse than just the retweet rates, probably suffering from having twice as many predictors and over-fitting.
+Others do just as well or better; the SVM on $\alpha_s^{(p)}\log(F_u+1)$ being the best overall (Figure~\ref{fig:svmattempts} black).  
+The second best non-naive feature set was $\phi_s^{(p)}$ set (Figure~\ref{fig:linearattempts} green).  
+
+In any event, the performance of most models which used the retweet rates themselves were similar, and the performance of models that didn't use them were worse.  
+
+\subsection{Results for the Cascade Prediction Problem}
+
+The results for this approach, summarized in \ref{fig:jurerocks} are far more positive.  
+The baseline approach, the approach-to-beat, is only using the rewtweet rates.  
+Excitingly, adding partial alphas (red and blue) beat the baseline!   Knowing the total $\alpha_s$ (red) helps a bit early on, although it seems to have diminishing returns for larger tweets.  
+Sadly, the other two features both performed no better than baseline.
+
