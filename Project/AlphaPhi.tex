@@ -1,4 +1,9 @@
-\section{\texttt{AlphaPhi}: Features from a Generative Model}
+\section{\texttt{AlphaPhi}: A Generative Model for learning a Tweet's Intrinsic Quality}
+
+For many of us, a tweet is considered a success if we get just a few retweets, since we have just a few followers.
+Conversely, some people can get many retweets and consider the tweet a failure, because they have very many of followers and expect more.
+We propose the following model that allows us to measure the intrinsic quality of a tweet independent of its visibility.  
+
 
 \subsection{The model}
 We propose the following generative model for retweet behavior on twitter.
@@ -94,8 +99,8 @@ This is actually a good thing: at the very least we won't dramatically overestim
 We get
 \begin{eqnarray}
   \Prob{u\to u'~|~R_{u,u'}\ge r} &=& \frac{\Prob{u\to u'}\Prob{R_{u,u'}\ge r~|~u\to u'}}{\Prob{R_{u,u'}\ge r}}\nonumber\\
-  &=& \pfrac{F_{u'}}{N}\pfrac{N-1}{\#\{a : R_{a,u'}\ge r\}}\Prob{\mbox{Binomial}(1/F_{u'},R_{u'}) \ge r}\nonumber\\
-  &\approx& \pfrac{F_{u'}}{\#\{a : R_{a,u'}\ge r\}}\Prob{\mathcal{N}\left(\frac{R_{u'}}{F_{u'}},\frac{\mbox{Binomial}(1/F_{u'},R_{u'})\ge r}\label{eq:edgeprob}
+  &=& \pfrac{F_{u'}}{N}\pfrac{N-1}{\#\{a : R_{a,u'}\ge r\}}\Prob{\mbox{Binomial}(1/F_{u'},R_{u'}) \ge r}\nonumber
+abel{eq:edgeprob}
 \end{eqnarray}
 
 As a sanity check, if $r=0$, this should be approximately zero.
@@ -113,10 +118,35 @@ Now, for any user $u$ and tweet $s$, we have
 where $b_{s,u'}$ indicates $u'$ retweeting $s$, as in equation~\eqref{eq:aplikelihood}.  
 We can still optimize individual parameters in Algorithm~\ref{alg:apalg} with only a slight modification; they key properties of the likelihood function still hold.  
 
-\subsection{Using the Learned Parameters on New Tweets}
+\subsection{Features from \texttt{AlphaPhi}: Partial Alphas}
 
-Once the parameters $\alpha$  and $\phi$ are learned, $\alpha$ can be discarded.
-When a new tweet $s$ is observed at time $p$ after its creation, giving early observations of its retweet behavior, we can (easily) compute estimate $\alpha_s^{(p)}$.
+The $\alpha_s$ parameters are, in and of themselves, and interesting feature, since they attempt to tell us how good a tweet is independent of a user's influence.  However, we still with to predict the total number of eventual retweets, so we ask for a little bit more.  
+Thus we propose the following predictive features based on this model.     
+
+\label{sec:apfeature}
+
+When a new tweet $s$ is observed at time $p$ after its creation, giving early observations of its retweet behavior, we can (easily) compute estimate $\alpha_s^{(p)}$, which we call the partial $\alpha$ at time $p$. 
 We use values of $\alpha_s^{(p)}$ for a few small values of $p$ as high powered features to predict the eventual popularity of $s$.
 
+Another useful feature, given a tweet $s$ of topic $t$ at time $p$ after its creation, is the average value of the $\phi_{u,t}$ for each $u$ that retweeted $s$ so far.
+We call this feature $\phi_s^{(p)}$. 
 
+\subsection{Interpreting the parameters}
+
+Not surprisingly, most of the $\phi_{u,t}$'s are zero: most users don't ever retweet things of most topics (some users rarely retweet at all).
+In fact, 98.8\% of all the $\phi_{u,t}$ values were zero, while 1.1\% were exactly one.
+Explaining the second fact is equally easy: some people retweet almost everything they see from a topic (recall our learning algorithm optimized by binning, so to report a $\phi_{u,t}=1.0$ merely means its closer to 1 than 0.86).  
+In the middle, there is a nice spread, as one might expect, see Figure~\ref{fig:phihist}.
+
+Interpreting the $\alpha$ parameters must be done with care, especially when trying to predict the eventual number of retweets.
+Indeed, and $\alpha$ can be high both because it was often retweeted and because it was seldom seen.
+Users with very few followers often produced these high quality tweets, although many of the most retweeted also had very high quality.
+Conversely, a tweet could be low quality because it was over-exposed.  We graph
+
+\begin{figure}[h!]
+  \centering
+   \includegraphics[width=0.5\textwidth]{../src/Analysis/phihist.png}
+   \caption{The distribution of the $\phi_{u,t}$ parameters after removing those with values zero or one. }
+   \label{fig:phihist}
+  
+\end{figure}
