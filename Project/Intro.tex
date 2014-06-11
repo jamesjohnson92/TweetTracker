@@ -5,19 +5,19 @@ When do its retweets echo far throughout the twittersphere, and when does  it fa
 Can you predict a winner seconds after its creation? How about minutes?
 How about before it was created at all?
 In this project, we investigate this problem.
-In particular: given a minute of information about a tweet and information about the poster, can you predict the number of retweets it gets after an hour?
+In particular: given a few minutes of information about a tweet and information about the poster, can you predict the number of retweets it gets after an hour?
 
 To this end, we intend to build interesting and useful features for these predictions, and use standard learning algorithms.  
 
 \subsection{Our Features}
 
-We propose two novel measures of Twitter retweetability, and use these to build features to learn on.
-The first is a \texttt{GraphRank} based algorithm called \texttt{RetweetRank}, based on work by  \cite{Weng:2010:TFT:1718487.1718520}.  
+We propose two types of novel measures of Twitter retweetability, and use these to build features to learn on.
+The first are based on a \texttt{GraphRank}algorithm called \texttt{RetweetRank}, based on a similar measure called \texttt{TwitterRank}, from  \cite{Weng:2010:TFT:1718487.1718520}.  
 For each user, we compute a retweetability rank, with the standard assumption that a user has a high propensity for being retweeted if they are retweeted by users with a high propensity to be retweeted.  
 
 The second measure comes from assuming a generative process through which tweets propagate through the network.
 Each tweet has a quality and each user has some probability of retweeting a perfect tweet of a given topic.
-We learn these on a body of work, and when a new tweet comes along we can learn its quality after observing it for a short period of time.  The idea: if you've been retweeted by someone who seldom retweets, this is a better indicator of your eventual success than if you're retweeted by someone who retweets very often.   
+We learn these on a body of work, and when a new tweet comes along we can learn its quality after observing it for a short period of time.  We compute an intrinsic measure of the quality of a tweet and build features for predicting number of retweets.  The idea: if you've been retweeted by someone who seldom retweets, this is a better indicator of your eventual success than if you're retweeted by someone who retweets very often.   
 
 \subsubsection{Use of Topics}
 

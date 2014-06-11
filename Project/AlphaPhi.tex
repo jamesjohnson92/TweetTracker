@@ -26,7 +26,7 @@ l(\alpha,\phi~|~a,b,\tau) = \sum_s\sum_u a_{s,u} \left[b_{s,u}\log\alpha_s\phi_{
 \subsection{Solving the \texttt{AlphaPhi} Problem}
 
 This likelihood (equation~\eqref{eq:aplikelihood}) has a few key properties.  
-One is that if $\alpha$ is fixed, the model is additive in the $\phi$, and if $\phi$ is fixed the likelihood is additive in $\alpha$.  
+One is that if $\alpha$ is fixed, the model is additive in $\phi$, and if $\phi$ is fixed the likelihood is additive in $\alpha$.  
 Another is that both conditional subproblems are convex, though the original problem need not be.  
 This suggests the following algorithm.  
 \begin{algorithm}
@@ -61,7 +61,7 @@ On a Dell laptop with 2GB of RAM, this easily scales to a million tweets and a m
 
 One worries that the likelihood function  (equation~\eqref{eq:aplikelihood}) is not convex!
 Indeed, it is easy to find examples where the solution is undefined: for instance if there is a tweet that was never retweeted and only seen by a user that never retweets, clearly the likelihood has no unique maximum.
-Still; we plot on, and hope for the best.
+Still; we plod on, and hope for the best.
 
 Because this is a generative model, it is easy to generate data for experimental purposes, and in fact we might as well assume there is only one topic, since we learn the parameters for each topic separately.  
 We start by using the R library \texttt{igraph} to generate a small-world network (Twitter is assumed to be one such).
@@ -104,7 +104,7 @@ We get
 
 As a sanity check, if $r=0$, this should be approximately zero.
 Indeed it is, as the prior is always approximately zero and normalizer will be approximately 1, thus making the posterior probability extremely small regardless of the likelihood.  
-For this reason, if $R_{u,u'}=0$, we set this probability to zero.
+For this reason, if $R_{u,u'}=0$, we set this probability to zero for sparsity's sake.  
 
 Further sanity checking, if $r=1$, for users with few retweets and a reasonable number of followers (average, non celebrity users), this will be high (possibly greater than 1, so we need to clamp!), which is good since we don't expect many retweets from non-followers, so even one retweet means you probably follow that person.  
 If $F_{u'}=1$ and only one person retweets, that one person is a follower with probability 1, since the variance in the binomial is zero!  Similar statements remain true if the number of re-tweeters is approximately the number of followers, so for average users this approximation is probably reasonable.  
@@ -119,12 +119,12 @@ We can still optimize individual parameters in Algorithm~\ref{alg:apalg} with on
 
 \subsection{Features from \texttt{AlphaPhi}: Partial Alphas}
 
-The $\alpha_s$ parameters are, in and of themselves, and interesting feature, since they attempt to tell us how good a tweet is independent of a user's influence.  However, we still with to predict the total number of eventual retweets, so we ask for a little bit more.  
+The $\alpha_s$ parameters are, in and of themselves, an interesting feature, since they attempt to tell us how good a tweet is independent of a user's influence.  However, we still wish to predict the total number of eventual retweets, so we ask for a little bit more.  
 Thus we propose the following predictive features based on this model.     
 
 \label{sec:apfeature}
 
-When a new tweet $s$ is observed at time $p$ after its creation, giving early observations of its retweet behavior, we can (easily) compute estimate $\alpha_s^{(p)}$, which we call the ``partial alpha'' at time $p$, and to contrast we call $\alpha_s$ the ``total alpha''.  
+When a new tweet $s$ is observed at time $p$ after its creation, giving early observations of its retweet behavior, we can (easily) estimate alpha as if its complete behavior was known, denoted $\alpha_s^{(p)}$, which we call the ``partial alpha'' at time $p$.  In contrast we call $\alpha_s$ the ``total alpha''.  
 We use values of $\alpha_s^{(p)}$ for a few small values of $p$ as high powered features to predict the eventual popularity of $s$.
 
 Another useful feature, given a tweet $s$ of topic $t$ at time $p$ after its creation, is the average value of the $\phi_{u,t}$ for each $u$ that retweeted $s$ so far.

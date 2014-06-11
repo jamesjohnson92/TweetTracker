@@ -37,16 +37,20 @@ We also experiment with using $\alpha_s$ itself for prediction, although this is
 \subsection{Results for the Regression Problem}
 
 The results for regression are summarized in Figure~\ref{fig:linearattempts}, Figure~\ref{fig:svmattempts}, Figure~\ref{fig:rfattempts}.  
-In each graph we include the best possible constant predictor (always predict the log mean), and in almost ever case, we beat it (sadly, the partial alphas times the log of the number of followers actually does worse when given later data!).
+In each graph we include the constant predictor (predict using only things known at tweet creation: followers and friends count), and in almost ever case, we beat it.
 
 Without fancy features, the naive first try would be to just use logs of $R_s^{(p)}$: this is the thing to beat.
-Notice first of all that most features sets which do not use $R_s^{(p)}$ do much worse than it; the exception being linear models on the partial \texttt{RetweetRank} (Figure~\ref{fig:linearattempts} orange).  
+We look first at the linear model.  
+Notice first of all that most features sets which do not use $R_s^{(p)}$ do much worse; the exception being linear models on the partial \texttt{RetweetRank} (Figure~\ref{fig:linearattempts} orange).  
 This is sad, but not surprising, as these things try to encode fancy information not directly related to what we are computing, while the retwet rates are literally early predictors of this response, and at least they beat the constant estimator.  
-Some features sets do worse than just the retweet rates, probably suffering from having twice as many predictors and over-fitting.
-Others do just as well or better; the SVM on $\alpha_s^{(p)}\log(F_u+1)$ being the best overall (Figure~\ref{fig:svmattempts} black).  
-The second best non-naive feature set was $\phi_s^{(p)}$ set (Figure~\ref{fig:linearattempts} green).  
+The remaining linear models on features sets including the retweet rates do almost exactly as well as just the retweet rates, as the three nearly identical curves in the middle of Figure~\ref{fig:linearattempts} shows.  
 
-In any event, the performance of most models which used the retweet rates themselves were similar, and the performance of models that didn't use them were worse.  
+
+On the SVM, the best feature set is $\alpha_s^{(p)}\log(F_u+1)$ with the retweet rates (Figure~\ref{fig:svmattempts} black).  
+It is not surprising a nonlinear fit is required to make this feature set really shine; the partial alphas can go up and down for all sorts of complicated reasons, but apparently the SVM could sort it out.  
+The partial alphas by themselves also did well (purple).  The other feature sets did worse than the most naive model (red), although still better than they did with the linear model.  
+
+On Random Forests, we beat the naive when we either add the partial alphas or the partial retweet ranks, and both do about as well as the other.  The phi averages do no worse than the naive, while the features which do not use the retweet rates do worse than the naive approach, but still better than they did in the linear models.  
 
 \subsection{Results for the Cascade Prediction Problem}
 
@@ -55,3 +59,25 @@ The baseline approach, the approach-to-beat, is only using the rewtweet rates.
 Excitingly, adding partial alphas (red and blue) beat the baseline!   Knowing the total $\alpha_s$ (red) helps a bit early on, although it seems to have diminishing returns for larger tweets.  
 Sadly, the other two features both performed no better than baseline.
 
+\section{Difficulties and Future Work}
+
+One major difficulty we had was the massive pipeline required to compute the features we cared about.
+In particular, computing the LDA model and tweet topic took days of compute time and required careful use of AWS resources.
+Many things about AWS were found to be non-intuitive, like \texttt{HIVE} require explicit copying of the data from \texttt{S3} to run in any reasonable amount of time and seeming to be very sensitive to the way queries were written.
+The long running jobs all dependent on each other were insanity inducing, and we barely finished on time.
+
+Another difficulty is the incomplete data.
+While the retweet rates were known almost exactly (since we could read the number of retweets from the JSON file), the other features were build on looking at the individual rewteeters, of whom we knew only 10\%.  This made those features far less robust than the retweet rate itself.
+It would be interesting to see if using the entire firehose would improve performance.
+Estimates of the graph were likewise annoying, and we wonder if we could build better \texttt{AlphaPhi} estimate if we knew the exact graph.
+
+It would also be interesting to try playing with the number of topics, combining classes of features and tuning machine learning algorithms for better performance.  
+
+
+\section{Conclusions}
+
+We created two new sets of measures, one of user retweetability and one of tweet quality, and used them to engineer features to predict the number of retweets.
+Our initial results with \texttt{AlphaPhi} were promising, we were able to improve both regressions and cascade predictions, although they require a nonlinear algorithm to unlock their full potential.  
+The \texttt{TwitterRanke} was very predictive with linear predictors, not requiring non linearity at all.  
+We were able to do even better when trying to predict cascades.  
+Predicting tweet popularity is a difficult problem, and I think we gave it a good fight.  
